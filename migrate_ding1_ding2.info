@@ -1,0 +1,14 @@
+name = "Migrate from Ding1 to Ding2"
+description = "Module to migrate site content from Ding/D6 to Ding2/D7"
+package = "Ding!"
+core = 7.x
+
+dependencies[] = migrate
+dependencies[] = migrate_extras
+dependencies[] = migrate_d2d
+
+#  include the files that contain your Migrate classes
+files[] = migrate_ding1_ding2.migrate.inc
+files[] = file.inc
+files[] = node.inc
+files[] = taxonomy.inc

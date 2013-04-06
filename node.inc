@@ -39,9 +39,16 @@ class DingLibraryMigration extends DingNodeMigration {
       'machine_name' => 'DingLibrary',
       'source_type' => 'library',
       'destination_type' => 'ding_library',
-      //'dependencies' => array('Tags'), //figure this out with dependencies
+      'dependencies' => array('DingFile'), //figure this out with dependencies
     );
 
+    // Add to sourceFields before calling parent constructor. 
+    // See http://www.acquia.com/blog/drupal-drupal-data-migration-part-2-architecture
+    $this->sourceFields['list_image_alt'] = t('Alt text extracted from field_list_image_data');
+    $this->sourceFields['list_image_title'] = t('Title text extracted from field_list_image_data');
+    $this->sourceFields['image_alt'] = t('Alt text extracted from field_image_data');
+    $this->sourceFields['image_title'] = t('Title text extracted from field_image_data');
+    
     parent::__construct($arguments);
 
     $this->addFieldMapping('field_ding_library_body', 'body');
@@ -68,6 +75,36 @@ class DingLibraryMigration extends DingNodeMigration {
     $this->addFieldMapping('field_ding_library_slug', 'slug'); 
     $this->addFieldMapping('field_ding_library_slug:language')
          ->defaultValue('und');
+
+    // Map the list image field to the new list image field, base this on the Files migration
+    // to map the files to the imported files table.
+    $this->addFieldMapping('field_ding_library_list_image', 'field_list_image')
+         ->sourceMigration('Files');
+    $this->addFieldMapping('field_ding_library_list_image:file_class')
+         ->defaultValue('MigrateFileFid');
+    $this->addFieldMapping('field_ding_library_list_image:language')
+         ->defaultValue('und');
+    // Mapping remaining list image fields
+    $this->addFieldMapping('field_ding_library_list_image:alt', 'list_image_alt');
+    $this->addFieldMapping('field_ding_library_list_image:title', 'list_image_title');
+    $this->addFieldMapping(NULL, 'field_list_image:data')
+         ->description(t('Split this into list_image_alt and list_image_title for D7'));
+    $this->addFieldMapping(NULL, 'field_list_image:list');
+
+    // Map the image field to the new title image field, base this on the Files migration
+    // to map the files to the imported files table.
+    $this->addFieldMapping('field_ding_library_title_image', 'field_image')
+         ->sourceMigration('Files');
+    $this->addFieldMapping('field_ding_library_title_image:file_class')
+         ->defaultValue('MigrateFileFid');
+    $this->addFieldMapping('field_ding_library_title_image:language')
+         ->defaultValue('und');
+    // Mapping remaining title image fields
+    $this->addFieldMapping('field_ding_library_title_image:alt', 'image_alt');
+    $this->addFieldMapping('field_ding_library_title_image:title', 'image_title');
+    $this->addFieldMapping(NULL, 'field_image:data')
+         ->description(t('Split this into image_alt and image_title for D7'));
+    $this->addFieldMapping(NULL, 'field_image:list');
 
     // Map to addressfield. See addressfield.inc in migrate_extras for available argument keys.
     $address_arguments = array(
@@ -105,21 +142,80 @@ class DingLibraryMigration extends DingNodeMigration {
     // Since the excerpt is mapped via an argument, add a null mapping so it's not flagged as unmapped.
     $this->addFieldMapping(NULL, 'latitude');
     $this->addFieldMapping(NULL, 'longitude');
+
+    // Mapping taxonomies
+    $this->addFieldMapping(NULL, '2');
+
+    // opening_hours fields relates to the module office_hours in Ding1/D6, and should not be mapped - this module is not used i Ding2/D7
+    $this->addFieldMapping(NULL, 'field_opening_hours')
+         ->description(t('Not mapped - Ding2/D7 uses the opening_hours module instead of office_hours module. This is handled by separate migration of the opening_hours table'));
+    $this->addFieldMapping(NULL, 'field_opening_hours:week_start');
+    $this->addFieldMapping(NULL, 'field_opening_hours:week_end');
+    $this->addFieldMapping(NULL, 'field_opening_hours:sun_open');
+    $this->addFieldMapping(NULL, 'field_opening_hours:sun_close');
+    $this->addFieldMapping(NULL, 'field_opening_hours:mon_open');
+    $this->addFieldMapping(NULL, 'field_opening_hours:mon_close');
+    $this->addFieldMapping(NULL, 'field_opening_hours:tue_open');
+    $this->addFieldMapping(NULL, 'field_opening_hours:tue_close');
+    $this->addFieldMapping(NULL, 'field_opening_hours:wed_open');
+    $this->addFieldMapping(NULL, 'field_opening_hours:wed_close');
+    $this->addFieldMapping(NULL, 'field_opening_hours:thu_open');
+    $this->addFieldMapping(NULL, 'field_opening_hours:thu_close');
+    $this->addFieldMapping(NULL, 'field_opening_hours:fri_open');
+    $this->addFieldMapping(NULL, 'field_opening_hours:fri_close');
+    $this->addFieldMapping(NULL, 'field_opening_hours:sat_open');
+    $this->addFieldMapping(NULL, 'field_opening_hours:sat_close');
+
+    // The opening_hours field in Ding2/D7 will be handled by migrating the opening_hours table of the module opening_hours
+    $this->addFieldMapping('field_ding_library_opening_hours')
+         ->description(t('Initially empty strings - field is populated by use of the site'))
+         ->defaultValue('');
+    $this->addFieldMapping('field_ding_library_opening_hours:language')
+         ->defaultValue('und');
+
+    // library links - are alt and title transferred over via argument?
+    $this->addFieldMapping('field_ding_library_links', 'field_links');
          
-    /*
-    $this->addFieldMapping('field_image', 'field_lead_graphic')
-         ->sourceMigration('Image');
-    // Note that we map migrated terms by the vocabulary ID.
-    $this->addFieldMapping('field_countries', '1')
-         ->sourceMigration('Countries')
-         ->arguments(array('source_type' => 'tid'));
-    $this->addFieldMapping('field_topics', '2')
-         ->sourceMigration('Topics')
-         ->arguments(array('source_type' => 'tid'));
-    */
-    
+    // Misc. mappings
+    $this->addFieldMapping(NULL, 'field_pc_booking_method');
+    $this->addFieldMapping(NULL, 'field_pc_booking_url');
+    $this->addFieldMapping(NULL, 'field_feature_ref')
+         ->description(t('Ding2/D7 does not employ feature nodes'));
+
   }
-  
+
+  public function prepareRow($row) {
+    // Always include this snippet, in case our parent class decides to ignore the row
+    if (parent::prepareRow($row) === FALSE) {
+       return FALSE;
+    }
+    
+    // Get values from serialized data and populate the source fields defined in our constructor
+    $list_image_data = unserialize($row->field_list_image_data);
+    $row->list_image_alt = $list_image_data['alt'];
+    $row->list_image_title = $list_image_data['title'];
+    
+    $image_data = unserialize($row->field_image_data);
+    $row->image_alt = $image_data['alt'];
+    $row->image_title = $image_data['title'];
+    
+    // field_links - is this how? See http://drupal.org/node/1159234
+    /*
+    $source_id = $row->em_id;
+    $row->hosts = array();
+
+    $query = db_select('tbl_onair_users', 'u')
+        ->fields('u', array('eu_uid'))
+        ->condition('eu_emid', $source_id)
+        ->condition('eu_resp',1);
+
+    $result = $query->execute();
+    foreach ($links_result as $links_row) {
+        $row->hosts[] = $links_row->eu_uid;
+    }
+    */
+  }
+
   // Modify the query to include location data
   // For more info, see:
   // http://www.acquia.com/blog/drupal-drupal-data-migration-part-2-architecture as well as
@@ -158,7 +254,8 @@ class DingCampaignMigration extends DingNodeMigration {
       'destination_type' => 'ding_campaign',
     );
 
-    // Add to sourceFields before calling parent constructor. See http://www.acquia.com/blog/drupal-drupal-data-migration-part-2-architecture
+    // Add to sourceFields before calling parent constructor. 
+    // See http://www.acquia.com/blog/drupal-drupal-data-migration-part-2-architecture
     $this->sourceFields['campaign_image_alt'] = t('Alt text extracted from field_campaign_image_data');
     $this->sourceFields['campaign_image_title'] = t('Title text extracted from field_campaign_image_data');
     

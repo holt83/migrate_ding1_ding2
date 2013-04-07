@@ -7,7 +7,8 @@ Dependencies
 ------------
 
 This module depends on the [http://drupal.org/project/migrate](migrate), [http://drupal.org/project/migrate_extras](migrate_extras) and [http://drupal.org/project/migrate_d2d](migrate_d2d) modules.
-
+Included is ding_migrate_extras, which contain Field Handlers needed by migrate_ding1_ding2. These handlers might or might not be availaible depending on the ding2 installation, and so it can be necessary to enable ding_migrate_extras.
+For example, MigrateLinkFieldHandler is included with Link 7.x-1.1, but at present, the ding2 distribution only includes Link 7.x-1.0. 
 
 Installation
 ------------

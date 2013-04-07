@@ -1,0 +1,8 @@
+name = Ding! Migrate Extras
+description = "Adds migrate module integration with contrib modules needed by migrate_ding1_ding2 and not covered elsewhere"
+core = 7.x
+package=Ding!
+
+dependencies[] = migrate
+files[] = link_field.inc
+

@@ -106,6 +106,11 @@ class DingLibraryMigration extends DingNodeMigration {
          ->description(t('Split this into image_alt and image_title for D7'));
     $this->addFieldMapping(NULL, 'field_image:list');
 
+    $this->addFieldMapping(NULL, 'field_content_images')
+         ->description(t('content images are not mapped to Ding2/D7'));
+    $this->addFieldMapping(NULL, 'field_content_images:list');
+    $this->addFieldMapping(NULL, 'field_content_images:data');
+    
     // Map to addressfield. See addressfield.inc in migrate_extras for available argument keys.
     $address_arguments = array(
       'field_ding_library_addresse_thoroughfare' => array('source_field' => 'street'),
@@ -173,12 +178,18 @@ class DingLibraryMigration extends DingNodeMigration {
     $this->addFieldMapping('field_ding_library_opening_hours:language')
          ->defaultValue('und');
 
-    // library links - are alt and title transferred over via argument?
+    // library links
     $this->addFieldMapping('field_ding_library_links', 'field_links');
-         
+    $this->addFieldMapping('field_ding_library_links:title', 'field_links:title');
+    $this->addFieldMapping('field_ding_library_links:attributes', 'field_links:attributes');
+    $this->addFieldMapping('field_ding_library_links:language')
+         ->defaultValue('und');
+
     // Misc. mappings
-    $this->addFieldMapping(NULL, 'field_pc_booking_method');
-    $this->addFieldMapping(NULL, 'field_pc_booking_url');
+    $this->addFieldMapping(NULL, 'field_pc_booking_method')
+         ->description(t('Ding2/D7 does not employ pc booking'));
+    $this->addFieldMapping(NULL, 'field_pc_booking_url')
+         ->description(t('Ding2/D7 does not employ pc booking'));
     $this->addFieldMapping(NULL, 'field_feature_ref')
          ->description(t('Ding2/D7 does not employ feature nodes'));
 
@@ -198,22 +209,7 @@ class DingLibraryMigration extends DingNodeMigration {
     $image_data = unserialize($row->field_image_data);
     $row->image_alt = $image_data['alt'];
     $row->image_title = $image_data['title'];
-    
-    // field_links - is this how? See http://drupal.org/node/1159234
-    /*
-    $source_id = $row->em_id;
-    $row->hosts = array();
 
-    $query = db_select('tbl_onair_users', 'u')
-        ->fields('u', array('eu_uid'))
-        ->condition('eu_emid', $source_id)
-        ->condition('eu_resp',1);
-
-    $result = $query->execute();
-    foreach ($links_result as $links_row) {
-        $row->hosts[] = $links_row->eu_uid;
-    }
-    */
   }
 
   // Modify the query to include location data

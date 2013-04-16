@@ -12,3 +12,5 @@ files[] = migrate_ding1_ding2.migrate.inc
 files[] = file.inc
 files[] = node.inc
 files[] = taxonomy.inc
+files[] = role.inc
+files[] = user.inc

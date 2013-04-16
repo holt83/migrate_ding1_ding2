@@ -17,8 +17,10 @@ function migrate_ding1_ding2_migrate_api() {
       'DingNews' => array('class_name' => 'DingNewsMigration'),
       'DingPage' => array('class_name' => 'DingPageMigration'),
       //'DingTopic' => array('class_name' => 'DingTopicMigration'),
+
       // User profiles
-      //'DingProfile' => array('class_name' => 'DingProfileMigration'),
+      'DingRole' => array('class_name' => 'DingRoleMigration'),
+      'DingUser' => array('class_name' => 'DingUserMigration'),
 
       // Taxonomies
       'DingEventCategoryTerm' => array('class_name' => 'DingEventCategoryTermMigration'),

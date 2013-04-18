@@ -113,13 +113,13 @@ class DingLibraryMigration extends DingNodeMigration {
     
     // Map to addressfield. See addressfield.inc in migrate_extras for available argument keys.
     $address_arguments = array(
-      'field_ding_library_addresse_thoroughfare' => array('source_field' => 'street'),
-      'field_ding_library_addresse_premise' => array('source_field' => 'additional'),
-      'field_ding_library_addresse_locality' => array('source_field' => 'city'),
-      'field_ding_library_addresse_sub_administrative_area' => array('source_field' => 'province'),
-      'field_ding_library_addresse_postal_code' => array('source_field' => 'postal_code'),
-      'field_ding_library_addresse_first_name' => array('source_field' => 'field_name_first'),
-      'field_ding_library_addresse_last_name' => array('source_field' => 'field_name_last'),
+      'thoroughfare' => array('source_field' => 'street'),
+      'premise' => array('source_field' => 'additional'),
+      'locality' => array('source_field' => 'city'),
+      'administrative_area' => array('source_field' => 'province'),
+      'postal_code' => array('source_field' => 'postal_code'),
+      'first_name' => array('source_field' => 'field_name_first'),
+      'last_name' => array('source_field' => 'field_name_last'),
     );
     // Note that of the country field is NULL, none of the values will be migrated!
     $this->addFieldMapping('field_ding_library_addresse', 'country')
@@ -200,7 +200,7 @@ class DingLibraryMigration extends DingNodeMigration {
     if (parent::prepareRow($row) === FALSE) {
        return FALSE;
     }
-    
+
     // Get values from serialized data and populate the source fields defined in our constructor
     $list_image_data = unserialize($row->field_list_image_data);
     $row->list_image_alt = $list_image_data['alt'];
@@ -210,6 +210,8 @@ class DingLibraryMigration extends DingNodeMigration {
     $row->image_alt = $image_data['alt'];
     $row->image_title = $image_data['title'];
 
+    // Make country code uppercase
+    $row->country = strtoupper($row->country);
   }
 
   // Modify the query to include location data

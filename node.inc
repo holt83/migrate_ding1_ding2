@@ -8,7 +8,7 @@ abstract class DingNodeMigration extends DrupalNode6Migration {
     $common_arguments = array(
       'source_connection' => 'legacy',
       'source_version' => 6,
-      'user_migration' => 'User',
+      'user_migration' => 'DingUser',
     );
     
     parent::__construct($arguments + $common_arguments);
@@ -39,7 +39,7 @@ class DingLibraryMigration extends DingNodeMigration {
       'machine_name' => 'DingLibrary',
       'source_type' => 'library',
       'destination_type' => 'ding_library',
-      'dependencies' => array('User','DingFile'),
+      'dependencies' => array('DingUser','DingFile'),
     );
 
     // Add to sourceFields before calling parent constructor. 
@@ -248,7 +248,7 @@ class DingCampaignMigration extends DingNodeMigration {
       'machine_name' => 'DingCampaign',
       'source_type' => 'campaign',
       'destination_type' => 'ding_campaign',
-      'dependencies' => array('User'),
+      'dependencies' => array('DingUser'),
     );
 
     // Add to sourceFields before calling parent constructor. 
@@ -338,7 +338,7 @@ class DingPageMigration extends DingNodeMigration {
       'machine_name' => 'DingPage',
       'source_type' => 'page',
       'destination_type' => 'ding_page',
-      'dependencies' => array('User','DingTagsTerm', 'DingLibrary'),
+      'dependencies' => array('DingUser','DingTagsTerm', 'DingLibrary'),
     );
 
     // Add to sourceFields before calling parent constructor. 
@@ -456,7 +456,7 @@ class DingNewsMigration extends DingNodeMigration {
       'machine_name' => 'DingNews',
       'source_type' => 'article',
       'destination_type' => 'ding_news',
-      'dependencies' => array('User','DingNewsCategoryTerm','DingTagsTerm'),
+      'dependencies' => array('DingUser','DingNewsCategoryTerm','DingTagsTerm'),
     );
 
     // Add to sourceFields before calling parent constructor. 
@@ -583,7 +583,7 @@ class DingEventMigration extends DingNodeMigration {
       'machine_name' => 'DingEvent',
       'source_type' => 'event',
       'destination_type' => 'ding_event',
-      'dependencies' => array('User','DingEventCategoryTerm','DingEventTargetTerm'),
+      'dependencies' => array('DingUser','DingEventCategoryTerm','DingEventTargetTerm'),
     );
 
     parent::__construct($arguments);

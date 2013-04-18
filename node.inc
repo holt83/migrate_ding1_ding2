@@ -118,14 +118,14 @@ class DingLibraryMigration extends DingNodeMigration {
       'locality' => array('source_field' => 'city'),
       'administrative_area' => array('source_field' => 'province'),
       'postal_code' => array('source_field' => 'postal_code'),
-      'first_name' => array('source_field' => 'field_name_first'),
-      'last_name' => array('source_field' => 'field_name_last'),
+      'name_line' => array('source_field' => 'name'),
     );
     // Note that of the country field is NULL, none of the values will be migrated!
     $this->addFieldMapping('field_ding_library_addresse', 'country')
          ->arguments($address_arguments);
  
     // Since the excerpt is mapped via an argument, add a null mapping so it's not flagged as unmapped.
+    $this->addFieldMapping(NULL, 'name');
     $this->addFieldMapping(NULL, 'street');
     $this->addFieldMapping(NULL, 'additional');
     $this->addFieldMapping(NULL, 'city');
@@ -223,6 +223,7 @@ class DingLibraryMigration extends DingNodeMigration {
     $query->leftJoin('location_instance', 'li', 'n.nid=li.nid AND n.vid = li.vid');
     $query->addField('li', 'lid');
     $query->leftJoin('location', 'l', 'li.lid=l.lid');
+    $query->addField('l', 'name');
     $query->addField('l', 'street');
     $query->addField('l', 'additional');
     $query->addField('l', 'city');

@@ -292,7 +292,7 @@ class DingCampaignMigration extends DingNodeMigration {
     // Map the image field to the new image field, base this on the Files migration
     // to map the files to the imported files table.
     $this->addFieldMapping('field_camp_image', 'field_campaign_image')
-         ->sourceMigration('Files');
+         ->sourceMigration('DingFile');
     $this->addFieldMapping('field_camp_image:file_class')
          ->defaultValue('MigrateFileFid');
     $this->addFieldMapping('field_camp_image:language')
@@ -337,11 +337,11 @@ class DingPageMigration extends DingNodeMigration {
   public function __construct() {
     
     $arguments = array(
-      'description' => t('Migration of Campaigns from Ding1/D6'),
+      'description' => t('Migration of Pages from Ding1/D6'),
       'machine_name' => 'DingPage',
       'source_type' => 'page',
       'destination_type' => 'ding_page',
-      'dependencies' => array('DingUser','DingTagsTerm', 'DingLibrary'),
+      'dependencies' => array('DingUser','DingTagsTerm', 'DingLibrary', 'DingFile'),
     );
 
     // Add to sourceFields before calling parent constructor. 

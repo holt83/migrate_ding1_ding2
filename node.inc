@@ -459,7 +459,7 @@ class DingNewsMigration extends DingNodeMigration {
       'machine_name' => 'DingNews',
       'source_type' => 'article',
       'destination_type' => 'ding_news',
-      'dependencies' => array('DingUser','DingNewsCategoryTerm','DingTagsTerm'),
+      'dependencies' => array('DingUser','DingNewsCategoryTerm','DingTagsTerm','DingFile','DingLibrary'),
     );
 
     // Add to sourceFields before calling parent constructor. 
@@ -478,8 +478,12 @@ class DingNewsMigration extends DingNodeMigration {
     $this->addFieldMapping('field_ding_news_lead', 'field_teaser');
     $this->addFieldMapping('field_ding_news_lead:language')
          ->defaultValue('und');
-    $this->addFieldMapping('field_ding_news_library', 'field_library_ref');
-
+    //$this->addFieldMapping('field_ding_news_library', 'field_library_ref');
+    // Testing mapping by making all news belong to 70 ('Egtved')
+    $this->addFieldMapping('field_ding_news_library')
+         ->defaultValue(70); // <-- this doesn't do it.. what now? It IS not a integer field, so I cannot just set it like that. Need a function to run..
+         
+         
     // Files mapping
     $this->addFieldMapping('field_ding_news_files', 'field_file_attachments')
          ->sourceMigration('DingFile');
@@ -574,7 +578,33 @@ class DingNewsMigration extends DingNodeMigration {
     $row->list_image_alt = $list_image_data['alt'];
     $row->list_image_title = $list_image_data['title'];
   }
-  
+
+  public function prepare($node, stdClass $row) {
+    // Assign news to library by manipulating node object directly. 
+    // Ugly, but needs to be done this way until we have bumped OG version to 2.1, which contains the migrate classes needed by OG
+    $this->setDingNewsGid($node, $row);
+
+  }
+
+  // function to set GID for a ding_news node
+  private function setDingNewsGid($node, $row) {
+    $old_nid = $row->field_library_ref[0];
+
+    // Process if old Ding1 node has a field_library_ref value
+    if ($old_nid) {
+      // Get new entity ID for the library from the mappings
+      $ding2libnid = db_query("SELECT destid1 FROM {migrate_map_dinglibrary} WHERE sourceid1 = :sourceid1", array(':sourceid1' => $old_nid))->fetchField();
+      $gids = og_get_group_ids('node', array($ding2libnid), array(OG_STATE_ACTIVE), FALSE);
+
+      // Modify the node
+      $node->field_ding_news_library['und'][0]['gid'] = $gids[$ding2libnid];
+      $node->field_ding_news_library['und'][0]['state'] = 1;
+      $node->field_ding_news_library['und'][0]['created'] = time();
+      
+      // Logging
+      watchdog('migrate_ding1_ding2', 'Setting GID = %gid on news item (%title) (based on Ding2 library entity ID %ding2libnid - the Ding1 library nid was %old_nid)', array('%title'=>$node->title, '%gid' => $gids[$ding2libnid], '%ding2libnid' => $ding2libnid, '%old_nid' => $old_nid), WATCHDOG_INFO);
+    }
+  }
 }
 
 

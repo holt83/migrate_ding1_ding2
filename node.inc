@@ -28,6 +28,33 @@ abstract class DingNodeMigration extends DrupalNode6Migration {
     // Unmapped destination fields - EXAMPLE
     //$this->addUnmigratedDestinations(array('log', 'tnid', 'translate', 'body:summary', 'body:format', 'body:language', 'comment'))
   }
+  
+  // function to create ting objects with relations to the node
+  public function createDingNodeTingRefs($node, $row) {
+    
+    if (count($row->field_ting_refs) > 0) {
+
+      $refs = '';
+
+      foreach ($row->field_ting_refs as $ref) {
+        // Save a ting object entity
+        $tid = migrate_ding1_ding2_add_ting_object($ref);
+
+        // Create relation
+        $rel_ent = ting_reference_create_relation('node', $node->nid, $tid);
+        
+        // Append to logging string
+        $refs .= $ref . ', ';
+      }
+
+      $refs = rtrim($refs, ', '); 
+
+      // Logging
+      watchdog('migrate_ding1_ding2', 'Created Ting object reference(s) (%refs) with relation(s) on item (%title - D7 nid %d7nid)', array('%refs' => $refs, '%title'=>$node->title, '%d7nid'=>$node->nid), WATCHDOG_INFO);
+
+    }
+  }
+  
 }
 
 
@@ -583,8 +610,15 @@ class DingNewsMigration extends DingNodeMigration {
     // Assign news to library by manipulating node object directly. 
     // Ugly, but needs to be done this way until we have bumped OG version to 2.1, which contains the migrate classes needed by OG
     $this->setDingNewsGid($node, $row);
-
   }
+
+  public function complete($node, stdClass $row) {
+    // Create Ting objects and relation to it for each item i field_ting_refs
+    // We perform this in complete() function since we need the nid on the news node just created
+    //$this->createDingNewsTingRefs($node, $row);
+    parent::createDingNodeTingRefs($node, $row);
+  }
+
 
   // function to set GID for a ding_news node
   private function setDingNewsGid($node, $row) {
@@ -623,4 +657,42 @@ class DingEventMigration extends DingNodeMigration {
 
     //$this->addFieldMapping('field_ding_library_body', 'body');    
   }
+}
+
+/*
+ * Function to insert a new ting_object into the database.
+ * 
+ * Return value: the tid of the created ting_object.
+ * 
+ * TO DO: This is not the drupal way of creating a new ting_object entity a should be replaced by the proper calls.
+ */
+function migrate_ding1_ding2_add_ting_object($ting_id) {
+  // open transaction
+  $transaction = db_transaction();
+
+  try {
+    $tid = db_insert('ting_object')
+      ->fields(array(
+        'ding_entity_id' => $ting_id,
+      ))
+      ->execute();
+
+    $vid = db_insert('ting_object_revision')
+      ->fields(array(
+        'tid' => $tid,
+        'timestamp' => 0,
+      ))
+      ->execute();
+
+    db_update('ting_object')
+    ->condition('tid', $tid)
+    ->fields(array('vid' => $vid))
+    ->execute();
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    watchdog_exception('migrate_ding1_ding2', $e);
+  }
+
+  return $tid;
 }

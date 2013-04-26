@@ -37,14 +37,20 @@ abstract class DingNodeMigration extends DrupalNode6Migration {
       $refs = '';
 
       foreach ($row->field_ting_refs as $ref) {
-        // Save a ting object entity
-        $tid = migrate_ding1_ding2_add_ting_object($ref);
-
-        // Create relation
-        $rel_ent = ting_reference_create_relation('node', $node->nid, $tid);
-        
-        // Append to logging string
-        $refs .= $ref . ', ';
+        if ($ref) {
+          // Save a ting object entity
+          $tid = migrate_ding1_ding2_add_ting_object($ref);
+  
+          // Create relation
+          if ($tid) {
+            $rel_ent = ting_reference_create_relation('node', $node->nid, $tid);
+            dpm($rel_ent);
+  
+            // Append to logging string
+            $refs .= $ref . ', ';
+          }
+          
+        }
       }
 
       $refs = rtrim($refs, ', '); 

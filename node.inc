@@ -505,12 +505,9 @@ class DingNewsMigration extends DingNodeMigration {
     $this->addFieldMapping('field_ding_news_lead', 'field_teaser');
     $this->addFieldMapping('field_ding_news_lead:language')
          ->defaultValue('und');
-    //$this->addFieldMapping('field_ding_news_library', 'field_library_ref');
-    // Testing mapping by making all news belong to 70 ('Egtved')
-    $this->addFieldMapping('field_ding_news_library')
-         ->defaultValue(70); // <-- this doesn't do it.. what now? It IS not a integer field, so I cannot just set it like that. Need a function to run..
-         
-         
+    $this->addFieldMapping(NULL, 'field_library_ref')
+         ->description(t('Handled in prepare function'));
+
     // Files mapping
     $this->addFieldMapping('field_ding_news_files', 'field_file_attachments')
          ->sourceMigration('DingFile');
@@ -584,7 +581,8 @@ class DingNewsMigration extends DingNodeMigration {
       'field_ding_news_title_image:destination_file', 
       'field_ding_news_title_image:file_replace', 
       'field_ding_news_title_image:preserve_files', 
-      'field_ding_news_title_image:source_dir', 
+      'field_ding_news_title_image:source_dir',
+      'field_ding_news_library', 
     ));
 
   }

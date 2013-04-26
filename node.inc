@@ -37,21 +37,27 @@ abstract class DingNodeMigration extends DrupalNode6Migration {
       $refs = '';
 
       foreach ($row->field_ting_refs as $ref) {
-        // Save a ting object entity
-        $tid = migrate_ding1_ding2_add_ting_object($ref);
-
-        // Create relation
-        $rel_ent = ting_reference_create_relation('node', $node->nid, $tid);
-        
-        // Append to logging string
-        $refs .= $ref . ', ';
+        if ($ref) {
+          // Save a ting object entity
+          $tid = migrate_ding1_ding2_add_ting_object($ref);
+  
+          // Create relation
+          if ($tid) {
+            $rel_ent = ting_reference_create_relation('node', $node->nid, $tid);
+  
+            // Append to logging string
+            $refs .= $ref . ', ';
+          }
+          
+        }
       }
 
       $refs = rtrim($refs, ', '); 
 
       // Logging
-      watchdog('migrate_ding1_ding2', 'Created Ting object reference(s) (%refs) with relation(s) on item (%title - D7 nid %d7nid)', array('%refs' => $refs, '%title'=>$node->title, '%d7nid'=>$node->nid), WATCHDOG_INFO);
-
+      if ($refs != '') {
+        watchdog('migrate_ding1_ding2', 'Created Ting object reference(s) (%refs) with relation(s) on item (%title - D7 nid %d7nid)', array('%refs' => $refs, '%title'=>$node->title, '%d7nid'=>$node->nid), WATCHDOG_INFO);
+      }
     }
   }
   
@@ -418,8 +424,8 @@ class DingPageMigration extends DingNodeMigration {
     $this->addFieldMapping(NULL, 'field_list_image:list');
 
     // ting references
-    $this->addFieldMapping('field_ding_page_materials', 'field_ting_refs')
-         ->description(t('Finalized in complete function'));
+    $this->addFieldMapping(NULL, 'field_ting_refs')
+         ->description(t('Handled in complete function'));
     $this->addFieldMapping(NULL, 'field_ting_refs:ting_ref_type')
          ->description(t('Not mapped - Ding2 does not employ ref types'));
     $this->addFieldMapping(NULL, 'field_ting_refs:description')
@@ -455,6 +461,7 @@ class DingPageMigration extends DingNodeMigration {
       'field_ding_page_title_image:file_replace', 
       'field_ding_page_title_image:preserve_files', 
       'field_ding_page_title_image:source_dir',
+      'field_ding_page_materials',
     ));
     
   }
@@ -546,8 +553,8 @@ class DingNewsMigration extends DingNodeMigration {
     $this->addFieldMapping(NULL, 'field_list_image:list');
 
     // ting references
-    $this->addFieldMapping('field_ding_news_materials', 'field_ting_refs')
-         ->description(t('Finalized in complete function'));
+    $this->addFieldMapping(NULL, 'field_ting_refs')
+         ->description(t('Handled in complete function'));
     $this->addFieldMapping(NULL, 'field_ting_refs:ting_ref_type')
          ->description(t('Not mapped - Ding2 does not employ ref types'));
     $this->addFieldMapping(NULL, 'field_ting_refs:description')
@@ -591,7 +598,8 @@ class DingNewsMigration extends DingNodeMigration {
       'field_ding_news_title_image:file_replace', 
       'field_ding_news_title_image:preserve_files', 
       'field_ding_news_title_image:source_dir',
-      'field_ding_news_library', 
+      'field_ding_news_library',
+      'field_ding_news_materials',
     ));
 
   }

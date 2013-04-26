@@ -32,7 +32,7 @@ abstract class DingNodeMigration extends DrupalNode6Migration {
   // function to create ting objects with relations to the node
   public function createDingNodeTingRefs($node, $row) {
     
-    if (count($row->field_ting_refs) > 0) {
+    if (isset($row->field_ting_refs) && count($row->field_ting_refs) > 0) {
 
       $refs = '';
 
@@ -418,7 +418,8 @@ class DingPageMigration extends DingNodeMigration {
     $this->addFieldMapping(NULL, 'field_list_image:list');
 
     // ting references
-    $this->addFieldMapping('field_ding_page_materials', 'field_ting_refs');
+    $this->addFieldMapping('field_ding_page_materials', 'field_ting_refs')
+         ->description(t('Finalized in complete function'));
     $this->addFieldMapping(NULL, 'field_ting_refs:ting_ref_type')
          ->description(t('Not mapped - Ding2 does not employ ref types'));
     $this->addFieldMapping(NULL, 'field_ting_refs:description')
@@ -453,7 +454,7 @@ class DingPageMigration extends DingNodeMigration {
       'field_ding_page_title_image:destination_file', 
       'field_ding_page_title_image:file_replace', 
       'field_ding_page_title_image:preserve_files', 
-      'field_ding_page_title_image:source_dir', 
+      'field_ding_page_title_image:source_dir',
     ));
     
   }
@@ -473,6 +474,13 @@ class DingPageMigration extends DingNodeMigration {
     $list_image_data = unserialize($row->field_list_image_data);
     $row->list_image_alt = $list_image_data['alt'];
     $row->list_image_title = $list_image_data['title'];
+  }
+
+  public function complete($node, stdClass $row) {
+    // Create Ting objects and relation to it for each item i field_ting_refs
+    // We perform this in complete() function since we need the nid on the news node just created
+    //$this->createDingNewsTingRefs($node, $row);
+    parent::createDingNodeTingRefs($node, $row);
   }
   
 }
@@ -538,7 +546,8 @@ class DingNewsMigration extends DingNodeMigration {
     $this->addFieldMapping(NULL, 'field_list_image:list');
 
     // ting references
-    $this->addFieldMapping('field_ding_news_materials', 'field_ting_refs');
+    $this->addFieldMapping('field_ding_news_materials', 'field_ting_refs')
+         ->description(t('Finalized in complete function'));
     $this->addFieldMapping(NULL, 'field_ting_refs:ting_ref_type')
          ->description(t('Not mapped - Ding2 does not employ ref types'));
     $this->addFieldMapping(NULL, 'field_ting_refs:description')

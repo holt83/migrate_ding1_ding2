@@ -634,7 +634,6 @@ class DingNewsMigration extends DingNodeMigration {
     parent::createDingNodeTingRefs($node, $row);
   }
 
-
   // function to set GID for a ding_news node
   private function setDingNewsGid($node, $row) {
     $old_nid = $row->field_library_ref[0];
@@ -665,13 +664,232 @@ class DingEventMigration extends DingNodeMigration {
       'machine_name' => 'DingEvent',
       'source_type' => 'event',
       'destination_type' => 'ding_event',
-      'dependencies' => array('DingUser','DingEventCategoryTerm','DingEventTargetTerm'),
+      'dependencies' => array('DingUser','DingEventCategoryTerm','DingEventTargetTerm', 'DingTagsTerm', 'DingFile', 'DingLibrary'),
     );
 
+    // Add to sourceFields before calling parent constructor. 
+    // See http://www.acquia.com/blog/drupal-drupal-data-migration-part-2-architecture
+    $this->sourceFields['file_attachments_description'] = t('Description text extracted from field_file_attachments_data');
+    $this->sourceFields['list_image_alt'] = t('Alt text extracted from field_list_image_data');
+    $this->sourceFields['list_image_title'] = t('Title text extracted from field_list_image_data');
+    
     parent::__construct($arguments);
 
-    //$this->addFieldMapping('field_ding_library_body', 'body');    
+    $this->addFieldMapping('field_ding_event_body', 'body');
+    $this->addFieldMapping('field_ding_event_body:language')
+         ->defaultValue('und');
+    $this->addFieldMapping('field_ding_event_body:format')
+         ->defaultValue('ding_wysiwyg');
+    $this->addFieldMapping('field_ding_event_lead', 'field_teaser');
+    $this->addFieldMapping('field_ding_event_lead:language')
+         ->defaultValue('und');
+    $this->addFieldMapping(NULL, 'field_library_ref')
+         ->description(t('Handled in prepare function'));
+    $this->addFieldMapping('field_ding_event_date', 'field_datetime')
+         ->description(t('Handled in prepareRow function'));
+    // Add NULL mapping so to-date is not flagged as unmapped
+    $this->addFieldMapping(NULL, 'field_datetime:value2');
+    $this->addFieldMapping('field_ding_event_price', 'field_entry_price');
+
+    // Files mapping
+    $this->addFieldMapping('field_ding_event_files', 'field_file_attachments')
+         ->sourceMigration('DingFile');
+    $this->addFieldMapping('field_ding_event_files:file_class')
+         ->defaultValue('MigrateFileFid');
+    $this->addFieldMapping('field_ding_event_files:language')
+         ->defaultValue('und');
+    // Mapping remaining page file fields
+    $this->addFieldMapping('field_ding_event_files:description', 'file_attachments_description');
+    $this->addFieldMapping(NULL, 'field_file_attachments:data')
+         ->description(t('Split this into description for D7'));
+    $this->addFieldMapping('field_ding_event_files:display', 'file_attachments_description')
+         ->description(t('Use file_attachments_description again for this value - nothing else to map from source'));
+
+    // Map the list image field to the new list image field, base this on the DingFile migration
+    // to map the files to the imported files table.
+    $this->addFieldMapping('field_ding_event_list_image', 'field_list_image')
+         ->sourceMigration('DingFile');
+    $this->addFieldMapping('field_ding_event_list_image:file_class')
+         ->defaultValue('MigrateFileFid');
+    $this->addFieldMapping('field_ding_event_list_image:language')
+         ->defaultValue('und');
+    // Mapping remaining list image fields
+    $this->addFieldMapping('field_ding_event_list_image:alt', 'list_image_alt');
+    $this->addFieldMapping('field_ding_event_list_image:title', 'list_image_title');
+    $this->addFieldMapping(NULL, 'field_list_image:data')
+         ->description(t('Split this into list_image_alt and list_image_title for D7'));
+    $this->addFieldMapping(NULL, 'field_list_image:list');
+
+    // Map to addressfield. See addressfield.inc in migrate_extras for available argument keys.
+    $address_arguments = array(
+      'thoroughfare' => array('source_field' => 'street'),
+      'premise' => array('source_field' => 'additional'),
+      'locality' => array('source_field' => 'city'),
+      'administrative_area' => array('source_field' => 'province'),
+      'postal_code' => array('source_field' => 'postal_code'),
+      'name_line' => array('source_field' => 'name'),
+    );
+    // Note that of the country field is NULL, none of the values will be migrated!
+    $this->addFieldMapping('field_ding_event_location', 'country')
+         ->arguments($address_arguments);
+    // Since the excerpt is mapped via an argument, add a null mapping so it's not flagged as unmapped.
+    $this->addFieldMapping(NULL, 'name');
+    $this->addFieldMapping(NULL, 'street');
+    $this->addFieldMapping(NULL, 'additional');
+    $this->addFieldMapping(NULL, 'city');
+    $this->addFieldMapping(NULL, 'province');
+    $this->addFieldMapping(NULL, 'postal_code');
+    $this->addFieldMapping(NULL, 'country');
+    $this->addFieldMapping(NULL, 'latitude');
+    $this->addFieldMapping(NULL, 'longitude');
+    $this->addFieldMapping(NULL, 'lid');
+
+    // ting references
+    $this->addFieldMapping(NULL, 'field_ting_refs')
+         ->description(t('Handled in complete function'));
+    $this->addFieldMapping(NULL, 'field_ting_refs:ting_ref_type')
+         ->description(t('Not mapped - Ding2 does not employ ref types'));
+    $this->addFieldMapping(NULL, 'field_ting_refs:description')
+         ->description(t('Not mapped - Ding2 does not employ descriptions on ting refs.'));
+
+    // Event Category term mapping
+    $this->addFieldMapping('field_ding_event_category', '4')
+         ->sourceMigration('DingEventCategoryTerm');
+    $this->addFieldMapping('field_ding_event_category:source_type')
+         ->defaultValue('tid');
+    $this->addFieldMapping('field_ding_event_category:create_term')
+         ->defaultValue(TRUE);
+    $this->addFieldMapping('field_ding_event_category:ignore_case')
+         ->defaultValue(TRUE);
+
+    // Event Target term mapping
+    $this->addFieldMapping('field_ding_event_target', '5')
+         ->sourceMigration('DingEventTargetTerm');
+    $this->addFieldMapping('field_ding_event_target:source_type')
+         ->defaultValue('tid');
+    $this->addFieldMapping('field_ding_event_target:create_term')
+         ->defaultValue(TRUE);
+    $this->addFieldMapping('field_ding_event_target:ignore_case')
+         ->defaultValue(TRUE);
+
+         // Event Tags term mapping
+    $this->addFieldMapping('field_ding_event_tags', '2')
+         ->sourceMigration('DingTagsTerm');
+    $this->addFieldMapping('field_ding_event_tags:source_type')
+         ->defaultValue('tid');
+    $this->addFieldMapping('field_ding_event_tags:create_term')
+         ->defaultValue(TRUE);
+    $this->addFieldMapping('field_ding_event_tags:ignore_case')
+         ->defaultValue(TRUE);
+
+    // Add null mappings so sources are not flagged as unmapped.
+    $this->addFieldMapping(NULL, 'field_content_images');
+    $this->addFieldMapping(NULL, 'field_content_images:list');
+    $this->addFieldMapping(NULL, 'field_content_images:data');
+    $this->addFieldMapping(NULL, 'field_file_attachments:list');
+
+    // Unmapped destination fields
+    $this->addUnmigratedDestinations(array(
+      'field_ding_event_title_image', 
+      'field_ding_event_title_image:file_class', 
+      'field_ding_event_title_image:language', 
+      'field_ding_event_title_image:alt', 
+      'field_ding_event_title_image:title',
+      'field_ding_event_title_image:destination_dir', 
+      'field_ding_event_title_image:destination_file', 
+      'field_ding_event_title_image:file_replace', 
+      'field_ding_event_title_image:preserve_files', 
+      'field_ding_event_title_image:source_dir',
+      'field_ding_event_library',
+      'field_ding_event_materials',
+    ));
+
   }
+
+  public function prepareRow($row) {
+    // Always include this snippet, in case our parent class decides to ignore the row
+    if (parent::prepareRow($row) === FALSE) {
+       return FALSE;
+    }
+    
+    // Get values from serialized data and populate the source fields defined in our constructor
+    // file attachments
+    $file_attachments_data = unserialize($row->field_file_attachments_data);
+    $row->file_attachments_description = $file_attachments_data['description'];
+
+    // list images
+    $list_image_data = unserialize($row->field_list_image_data);
+    $row->list_image_alt = $list_image_data['alt'];
+    $row->list_image_title = $list_image_data['title'];
+    
+    // Handle date field
+    $date_data = array(
+      'from' => $row->field_datetime_value,
+      'to' => $row->field_datetime_value2,
+    );
+
+    // Datetime field handler accepts data as json array.
+    $row->field_datetime = drupal_json_encode($date_data);
+    
+    // Make country code uppercase
+    $row->country = strtoupper($row->country);
+
+  }
+
+  public function prepare($node, stdClass $row) {
+    // Assign news to library by manipulating node object directly. 
+    // Ugly, but needs to be done this way until we have bumped OG version to 2.1, which contains the migrate classes needed by OG
+    $this->setDingEventGid($node, $row);
+  }
+
+  public function complete($node, stdClass $row) {
+    // Create Ting objects and relation to it for each item i field_ting_refs
+    // We perform this in complete() function since we need the nid on the news node just created
+    //$this->createDingNewsTingRefs($node, $row);
+    parent::createDingNodeTingRefs($node, $row);
+  }
+
+  // function to set GID for a ding_event node
+  private function setDingEventGid($node, $row) {
+    $old_nid = $row->field_library_ref[0];
+
+    // Process if old Ding1 node has a field_library_ref value
+    if ($old_nid) {
+      // Get new entity ID for the library from the mappings
+      $ding2libnid = db_query("SELECT destid1 FROM {migrate_map_dinglibrary} WHERE sourceid1 = :sourceid1", array(':sourceid1' => $old_nid))->fetchField();
+      $gids = og_get_group_ids('node', array($ding2libnid), array(OG_STATE_ACTIVE), FALSE);
+
+      // Modify the node
+      $node->field_ding_event_library['und'][0]['gid'] = $gids[$ding2libnid];
+      $node->field_ding_event_library['und'][0]['state'] = 1;
+      $node->field_ding_event_library['und'][0]['created'] = time();
+      
+      // Logging
+      watchdog('migrate_ding1_ding2', 'Setting GID = %gid on event item (%title) (based on Ding2 library entity ID %ding2libnid - the Ding1 library nid was %old_nid)', array('%title'=>$node->title, '%gid' => $gids[$ding2libnid], '%ding2libnid' => $ding2libnid, '%old_nid' => $old_nid), WATCHDOG_INFO);
+    }
+  }
+
+  // Modify the query to include location data
+  // For more info, see:
+  // http://www.acquia.com/blog/drupal-drupal-data-migration-part-2-architecture as well as
+  // http://www.grasmash.com/article/migrate-classes-location-cck-address-field
+  protected function query() {
+    $query = parent::query();
+    $query->leftJoin('location_instance', 'li', 'n.nid=li.nid AND n.vid = li.vid');
+    $query->addField('li', 'lid');
+    $query->leftJoin('location', 'l', 'li.lid=l.lid');
+    $query->addField('l', 'name');
+    $query->addField('l', 'street');
+    $query->addField('l', 'additional');
+    $query->addField('l', 'city');
+    $query->addField('l', 'province');
+    $query->addField('l', 'postal_code');
+    $query->addField('l', 'country');
+    $query->addField('l', 'latitude');
+    $query->addField('l', 'longitude');
+    return $query;
+  }
+
 }
 
 /*

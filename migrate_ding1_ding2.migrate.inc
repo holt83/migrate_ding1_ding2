@@ -31,6 +31,10 @@ function migrate_ding1_ding2_migrate_api() {
       // Miscellaneous
       'DingFile' => array('class_name' => 'DingFileMigration'),
     ),
+    
+    'field handlers' => array(
+      'DateMigrateFieldHandler',
+    ),
   );
   return $api;
 }

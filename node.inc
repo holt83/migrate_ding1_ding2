@@ -824,10 +824,9 @@ class DingEventMigration extends DingNodeMigration {
     
     // Handle date field
     $date_data = array(
-      'from' => $row->field_datetime_value,
-      'to' => $row->field_datetime_value2,
+      'from' => $row->field_datetime,
+      'to' => $row->{'field_datetime:value2'},
     );
-
     // Datetime field handler accepts data as json array.
     $row->field_datetime = drupal_json_encode($date_data);
     

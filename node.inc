@@ -40,11 +40,11 @@ abstract class DingNodeMigration extends DrupalNode6Migration {
         if ($ref) {
           // Save a ting object entity
           $tid = migrate_ding1_ding2_add_ting_object($ref);
-  
+
           // Create relation
           if ($tid) {
             $rel_ent = ting_reference_create_relation('node', $node->nid, $tid);
-  
+
             // Append to logging string
             $refs .= $ref . ', ';
           }
@@ -486,7 +486,6 @@ class DingPageMigration extends DingNodeMigration {
   public function complete($node, stdClass $row) {
     // Create Ting objects and relation to it for each item i field_ting_refs
     // We perform this in complete() function since we need the nid on the news node just created
-    //$this->createDingNewsTingRefs($node, $row);
     parent::createDingNodeTingRefs($node, $row);
   }
   
@@ -630,7 +629,6 @@ class DingNewsMigration extends DingNodeMigration {
   public function complete($node, stdClass $row) {
     // Create Ting objects and relation to it for each item i field_ting_refs
     // We perform this in complete() function since we need the nid on the news node just created
-    //$this->createDingNewsTingRefs($node, $row);
     parent::createDingNodeTingRefs($node, $row);
   }
 
@@ -844,7 +842,6 @@ class DingEventMigration extends DingNodeMigration {
   public function complete($node, stdClass $row) {
     // Create Ting objects and relation to it for each item i field_ting_refs
     // We perform this in complete() function since we need the nid on the news node just created
-    //$this->createDingNewsTingRefs($node, $row);
     parent::createDingNodeTingRefs($node, $row);
   }
 
@@ -925,6 +922,6 @@ function migrate_ding1_ding2_add_ting_object($ting_id) {
     $transaction->rollback();
     watchdog_exception('migrate_ding1_ding2', $e);
   }
-
+  
   return $tid;
 }

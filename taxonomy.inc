@@ -8,7 +8,7 @@ abstract class DingTermMigration extends DrupalTerm6Migration {
     $common_arguments = array(
       'source_connection' => 'legacy',
       'source_version' => 6,
-      'soft_dependencies' => array('User'),
+      'soft_dependencies' => array('DingUser'),
     );
     
     parent::__construct($arguments + $common_arguments);

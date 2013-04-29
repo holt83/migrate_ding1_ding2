@@ -16,7 +16,6 @@ function migrate_ding1_ding2_migrate_api() {
       'DingLibrary' => array('class_name' => 'DingLibraryMigration'),
       'DingNews' => array('class_name' => 'DingNewsMigration'),
       'DingPage' => array('class_name' => 'DingPageMigration'),
-      //'DingTopic' => array('class_name' => 'DingTopicMigration'),
 
       // User profiles
       'DingRole' => array('class_name' => 'DingRoleMigration'),

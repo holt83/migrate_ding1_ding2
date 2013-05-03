@@ -20,6 +20,7 @@ function migrate_ding1_ding2_migrate_api() {
       // User profiles
       'DingRole' => array('class_name' => 'DingRoleMigration'),
       'DingUser' => array('class_name' => 'DingUserMigration'),
+      'DingProfile2' => array('class_name' => 'DingProfile2Migration'),
 
       // Taxonomies
       'DingEventCategoryTerm' => array('class_name' => 'DingEventCategoryTermMigration'),
@@ -27,10 +28,13 @@ function migrate_ding1_ding2_migrate_api() {
       'DingNewsCategoryTerm' => array('class_name' => 'DingNewsCategoryTermMigration'),
       'DingTagsTerm' => array('class_name' => 'DingTagsTermMigration'),
 
+      // Tables
+      'DingPlace2book' => array('class_name' => 'DingPlace2bookMigration'),
+
       // Miscellaneous
       'DingFile' => array('class_name' => 'DingFileMigration'),
     ),
-    
+
     'field handlers' => array(
       'DateMigrateFieldHandler',
     ),

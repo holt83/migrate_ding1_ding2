@@ -14,3 +14,5 @@ files[] = node.inc
 files[] = taxonomy.inc
 files[] = role.inc
 files[] = user.inc
+files[] = profile2.inc
+files[] = table.inc

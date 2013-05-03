@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Common mappings for table migrations.
+ */
 abstract class DingTableMigration extends Migration {
   public function __construct($arguments) {
     parent::__construct();
@@ -12,10 +14,7 @@ abstract class DingTableMigration extends Migration {
     $this->destination_table = $arguments['destination_table'];
     $this->source_key = $arguments['source_key'];
     
-    $query = Database::getConnection('default', $this->sourceConnection)
-             ->select($this->source_table, 't')
-             ->fields('t');
-    $this->source = new MigrateSourceSQL($query);
+    $this->source = new MigrateSourceSQL($this->query());
     $this->destination = new MigrateDestinationTable($this->destination_table);
 
     $this->map = new MigrateSQLMap(
@@ -24,11 +23,14 @@ abstract class DingTableMigration extends Migration {
       MigrateDestinationTable::getKeySchema()
     );
   }
-}
 
-/**
- * Common mappings for table migrations.
- */
+  protected function query() {
+    $query = Database::getConnection('default', $this->sourceConnection)
+             ->select($this->source_table, 't')
+             ->fields('t');
+    return $query;
+  }
+}
 
 
 class DingPlace2bookMigration extends DingTableMigration {
@@ -58,22 +60,16 @@ class DingPlace2bookMigration extends DingTableMigration {
     $this->addFieldMapping('nid', 'nid')
          ->sourceMigration('DingEvent');
   }
-  
-  public function prepareRow($row) {
-    // Always include this snippet, in case our parent class decides to ignore the row
-    if (parent::prepareRow($row) === FALSE) {
-       return FALSE;
-    }
 
-    // If event node doesn't exist, do not process this row
-    // Implement this by adding an extra row to the query function, so event table nid is included as legacy_event_nid - then this step will be easy..
-    /*
-    if (event nid does not exist) {
-       return FALSE;
-    }
-    */
-    
-    watchdog('migrate_ding1_ding2', 'processing place2book row: old_nid = ' . $row->nid . ' maintain_copy = ' . $row->maintain_copy);
+  protected function query() {
+    $query = parent::query();
+
+    // To avoid errors coming from event nodes that does not exist, 
+    // we join with the node table adding the condition that node id must not be null
+    $query->leftJoin('node', 'n', 't.nid=n.nid');
+    $query->isNotNull('n.nid');
+
+    return $query;
   }
 
 }

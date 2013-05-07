@@ -30,6 +30,7 @@ function migrate_ding1_ding2_migrate_api() {
 
       // Tables
       'DingPlace2book' => array('class_name' => 'DingPlace2bookMigration'),
+      'DingOpeningHours' => array('class_name' => 'DingOpeningHoursMigration'),
 
       // Miscellaneous
       'DingFile' => array('class_name' => 'DingFileMigration'),

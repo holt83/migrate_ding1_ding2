@@ -42,3 +42,50 @@ function migrate_ding1_ding2_migrate_api() {
   );
   return $api;
 }
+
+
+/*
+ * Function to insert a new ting_object into the database.
+ * 
+ * Return value: the tid of the created ting_object.
+ * 
+ * TO DO: This is not the drupal way of creating a new ting_object entity a should be replaced by the proper calls.
+ */
+function migrate_ding1_ding2_add_ting_object($ting_id) {
+  // if ting_object already exists, return the tid
+  $result = db_query('SELECT t.tid FROM {ting_object} t WHERE t.ding_entity_id = :entid', array(':entid' => $ting_id));
+  $tid = $result->fetchField();
+  if ($tid) {
+    return $tid;
+  }
+  
+  // open transaction
+  $transaction = db_transaction();
+
+  try {
+    $tid = db_insert('ting_object')
+      ->fields(array(
+        'ding_entity_id' => $ting_id,
+      ))
+      ->execute();
+
+    $vid = db_insert('ting_object_revision')
+      ->fields(array(
+        'tid' => $tid,
+        'timestamp' => 0,
+      ))
+      ->execute();
+
+    db_update('ting_object')
+    ->condition('tid', $tid)
+    ->fields(array('vid' => $vid))
+    ->execute();
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    watchdog_exception('migrate_ding1_ding2', $e);
+  }
+  
+  return $tid;
+}
+

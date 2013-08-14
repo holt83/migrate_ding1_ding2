@@ -34,6 +34,8 @@ function migrate_ding1_ding2_migrate_api() {
 
       // Miscellaneous
       'DingFile' => array('class_name' => 'DingFileMigration'),
+      'DingCart' => array('class_name' => 'DingCartMigration'),
+      
     ),
 
     'field handlers' => array(

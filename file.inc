@@ -5,7 +5,7 @@
  */
 
 class DingFileMigration extends DrupalFile6Migration {
-  public function __construct() {
+  public function __construct($arguments) {
     // The description and the migration machine name are also required arguments,
     // which will be unique for each migration you register.
     $file_arguments = array(
@@ -13,6 +13,7 @@ class DingFileMigration extends DrupalFile6Migration {
       'source_version' => 6,
       'description' => t('Migration of files from Ding1/D6'),
       'machine_name' => 'DingFile',
+      'group_name' => 'ding1_group',
       'source_dir' => '/home/quickstart/websites/d6.vejlebib.dev/',
       'user_migration' => 'DingUser',
     );

@@ -5,7 +5,7 @@
 abstract class DingTableMigration extends Migration {
   public function __construct($arguments) {
     parent::__construct();
-    $this->description = 'Migration of ding_place2book table from Ding1/D6';
+    $this->description = 'Migration of table from Ding1/D6';
     
     $this->dependencies = $arguments['dependencies'];
     $this->sourceConnection = 'legacy';
@@ -130,6 +130,46 @@ class DingOpeningHoursMigration extends DingTableMigration {
       watchdog('migrate_ding1_ding2', 'Fixing repeat_end_date of 0000-00-00 by setting it to future date %date', array('%date'=>$row->repeat_end_date), WATCHDOG_INFO);
     }
   }
-  
 
+}
+
+
+class DingAuthmapMigration extends DingTableMigration {
+  public function __construct() {
+    
+    $arguments = array(
+      'description' => t('Migration of authmap table from Ding1/D6'),
+      'machine_name' => 'DingAuthmap',
+      'source_table' => 'authmap',
+      'destination_table' => 'authmap',
+      'dependencies' => array('DingUser'),
+      'source_key' => array(
+        'uid' => array(
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'description' => 'Source User ID',
+          'alias' => 't',
+        )
+      ),
+    );
+
+    parent::__construct($arguments);
+
+    $this->addSimpleMappings(array('authname'));
+    
+    // In D7/Ding2, it is ding_user module that handles authentication for external users,
+    // so we set module to ding_user when migrating authmap table
+    $this->addFieldMapping('module')
+         ->defaultValue('ding_user');
+    
+    $this->addFieldMapping('uid', 'uid')
+         ->sourceMigration('DingUser');
+         
+    // Unmapped source fields
+    $this->addUnmigratedSources(array('aid', 'module'));
+    
+    // Unmapped destination fields
+    $this->addUnmigratedDestinations(array('aid'));
+  }
 }

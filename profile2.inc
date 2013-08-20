@@ -8,6 +8,7 @@ class DingProfile2Migration extends DrupalUser6Migration {
     $arguments = array(
       'description' => t('Migration of User fields from Ding1/D6 into profile2 entities'),
       'machine_name' => 'DingProfile2',
+      'group_name' => 'ding1_group',
       'source_connection' => 'legacy',
       'source_version' => 6,
       //'role_migration' => 'DingRole',

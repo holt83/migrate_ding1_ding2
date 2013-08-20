@@ -9,6 +9,11 @@
 function migrate_ding1_ding2_migrate_api() {
   $api = array(
     'api' => 2,
+    'groups' => array(
+      'ding1_group' => array(
+        'title' => t('Ding1 Group'),
+      ),
+    ), 
     'migrations' => array(
       // Node types
       'DingCampaign' => array('class_name' => 'DingCampaignMigration'),

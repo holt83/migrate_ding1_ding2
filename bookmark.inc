@@ -4,9 +4,16 @@
  */
 abstract class DingFlagMigration extends Migration {
   public function __construct($arguments) {
-    parent::__construct();
-    $this->description = 'Migration of tables from Ding1/D6 into D7 flags';
+    parent::__construct($arguments);
     
+    // With migrate_ui enabled, migration pages will indicate people involved in
+    // the particular migration, with their role and contact info. We default the
+    // list in the shared class; it can be overridden for specific migrations.
+    $this->team = array(
+      new MigrateTeamMember('Ewan Andreasen', 'ea@vejlebib.dk', t('Webdeveloper (Ding1 -> Ding2 Migration)')),
+    );
+    
+    $this->description = $arguments['description'];
     $this->dependencies = $arguments['dependencies'];
     $this->sourceConnection = 'legacy';
     $this->machine_name = $arguments['machine_name'];
@@ -34,13 +41,14 @@ abstract class DingFlagMigration extends Migration {
 
 
 class DingBookmarkMigration extends DingFlagMigration {
-  public function __construct() {
+  public function __construct($arguments) {
     // "bookmark" flags in ding2 has fid = 2
     $bookmark_fid = 2;
     
     $arguments = array(
       'description' => t('Migration of ding_cart table from Ding1/D6 into D7 bookmark flags (ding_bookmark)'),
       'machine_name' => 'DingBookmark',
+      'group_name' => 'ding1_group',
       'source_table' => 'ding_cart',
       'destination_fid' => $bookmark_fid,
       'dependencies' => array('DingUser'),

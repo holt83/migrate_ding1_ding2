@@ -8,6 +8,7 @@ class DingUserMigration extends DrupalUser6Migration {
     $arguments = array(
       'description' => t('Migration of Users from Ding1/D6'),
       'machine_name' => 'DingUser',
+      'group_name' => 'ding1_group',
       'source_connection' => 'legacy',
       'source_version' => 6,
       'role_migration' => 'DingRole',

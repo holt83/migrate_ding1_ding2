@@ -16,4 +16,4 @@ files[] = role.inc
 files[] = user.inc
 files[] = profile2.inc
 files[] = table.inc
-files[] = cart.inc
+files[] = bookmark.inc

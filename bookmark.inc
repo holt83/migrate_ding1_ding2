@@ -33,14 +33,14 @@ abstract class DingFlagMigration extends Migration {
 }
 
 
-class DingCartMigration extends DingFlagMigration {
+class DingBookmarkMigration extends DingFlagMigration {
   public function __construct() {
     // "bookmark" flags in ding2 has fid = 2
     $bookmark_fid = 2;
     
     $arguments = array(
-      'description' => t('Migration of ding_cart table from Ding1/D6'),
-      'machine_name' => 'DingCart',
+      'description' => t('Migration of ding_cart table from Ding1/D6 into D7 bookmark flags (ding_bookmark)'),
+      'machine_name' => 'DingBookmark',
       'source_table' => 'ding_cart',
       'destination_fid' => $bookmark_fid,
       'dependencies' => array('DingUser'),

@@ -34,7 +34,7 @@ function migrate_ding1_ding2_migrate_api() {
 
       // Miscellaneous
       'DingFile' => array('class_name' => 'DingFileMigration'),
-      'DingCart' => array('class_name' => 'DingCartMigration'),
+      'DingBookmark' => array('class_name' => 'DingBookmarkMigration'),
       
     ),
 
@@ -90,4 +90,3 @@ function migrate_ding1_ding2_add_ting_object($ting_id) {
   
   return $tid;
 }
-

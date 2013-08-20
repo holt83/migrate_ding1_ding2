@@ -65,11 +65,12 @@ abstract class DingNodeMigration extends DrupalNode6Migration {
 
 
 class DingLibraryMigration extends DingNodeMigration {
-  public function __construct() {
+  public function __construct($arguments) {
     
     $arguments = array(
       'description' => t('Migration of Libraries from Ding1/D6'),
       'machine_name' => 'DingLibrary',
+      'group_name' => 'ding1_group',
       'source_type' => 'library',
       'destination_type' => 'ding_library',
       'dependencies' => array('DingUser','DingFile'),
@@ -277,11 +278,12 @@ class DingLibraryMigration extends DingNodeMigration {
 
 
 class DingCampaignMigration extends DingNodeMigration {
-  public function __construct() {
+  public function __construct($arguments) {
     
     $arguments = array(
       'description' => t('Migration of Campaigns from Ding1/D6'),
       'machine_name' => 'DingCampaign',
+      'group_name' => 'ding1_group',
       'source_type' => 'campaign',
       'destination_type' => 'ding_campaign',
       'dependencies' => array('DingUser'),
@@ -367,11 +369,12 @@ class DingCampaignMigration extends DingNodeMigration {
 
 
 class DingPageMigration extends DingNodeMigration {
-  public function __construct() {
+  public function __construct($arguments) {
     
     $arguments = array(
       'description' => t('Migration of Pages from Ding1/D6'),
       'machine_name' => 'DingPage',
+      'group_name' => 'ding1_group',
       'source_type' => 'page',
       'destination_type' => 'ding_page',
       'dependencies' => array('DingUser','DingTagsTerm', 'DingLibrary', 'DingFile'),
@@ -493,11 +496,12 @@ class DingPageMigration extends DingNodeMigration {
 
 
 class DingNewsMigration extends DingNodeMigration {
-  public function __construct() {
+  public function __construct($arguments) {
     
     $arguments = array(
       'description' => t('Migration of Blogposts/News from Ding1/D6'),
       'machine_name' => 'DingNews',
+      'group_name' => 'ding1_group',
       'source_type' => 'article',
       'destination_type' => 'ding_news',
       'dependencies' => array('DingUser','DingNewsCategoryTerm','DingTagsTerm','DingFile','DingLibrary'),
@@ -655,11 +659,12 @@ class DingNewsMigration extends DingNodeMigration {
 
 
 class DingEventMigration extends DingNodeMigration {
-  public function __construct() {
+  public function __construct($arguments) {
     
     $arguments = array(
       'description' => t('Migration of Events from Ding1/D6'),
       'machine_name' => 'DingEvent',
+      'group_name' => 'ding1_group',
       'source_type' => 'event',
       'destination_type' => 'ding_event',
       'dependencies' => array('DingUser','DingEventCategoryTerm','DingEventTargetTerm', 'DingTagsTerm', 'DingFile', 'DingLibrary'),

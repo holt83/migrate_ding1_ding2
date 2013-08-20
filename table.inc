@@ -4,9 +4,16 @@
  */
 abstract class DingTableMigration extends Migration {
   public function __construct($arguments) {
-    parent::__construct();
-    $this->description = 'Migration of table from Ding1/D6';
+    parent::__construct($arguments);
     
+    // With migrate_ui enabled, migration pages will indicate people involved in
+    // the particular migration, with their role and contact info. We default the
+    // list in the shared class; it can be overridden for specific migrations.
+    $this->team = array(
+      new MigrateTeamMember('Ewan Andreasen', 'ea@vejlebib.dk', t('Webdeveloper (Ding1 -> Ding2 Migration)')),
+    );
+    
+    $this->description = $arguments['description'];
     $this->dependencies = $arguments['dependencies'];
     $this->sourceConnection = 'legacy';
     $this->machine_name = $arguments['machine_name'];
@@ -34,11 +41,12 @@ abstract class DingTableMigration extends Migration {
 
 
 class DingPlace2bookMigration extends DingTableMigration {
-  public function __construct() {
+  public function __construct($arguments) {
     
     $arguments = array(
       'description' => t('Migration of ding_place2book table from Ding1/D6'),
       'machine_name' => 'DingPlace2book',
+      'group_name' => 'ding1_group',
       'source_table' => 'ding_place2book',
       'destination_table' => 'ding_place2book',
       'dependencies' => array('DingEvent'),
@@ -76,11 +84,12 @@ class DingPlace2bookMigration extends DingTableMigration {
 
 
 class DingOpeningHoursMigration extends DingTableMigration {
-  public function __construct() {
+  public function __construct($arguments) {
     
     $arguments = array(
       'description' => t('Migration of opening_hours table from Ding1/D6'),
       'machine_name' => 'DingOpeningHours',
+      'group_name' => 'ding1_group',
       'source_table' => 'opening_hours',
       'destination_table' => 'opening_hours',
       'dependencies' => array('DingLibrary'),
@@ -94,9 +103,8 @@ class DingOpeningHoursMigration extends DingTableMigration {
         )
       ),
     );
-
     parent::__construct($arguments);
-
+    
     $this->addSimpleMappings(array('instance_id', 'date', 'start_time', 'end_time', 'notice', 'repeat_rule', 'repeat_end_date', 'original_instance_id', 'customised'));
     
     $this->addFieldMapping('nid', 'nid')
@@ -135,11 +143,12 @@ class DingOpeningHoursMigration extends DingTableMigration {
 
 
 class DingAuthmapMigration extends DingTableMigration {
-  public function __construct() {
+  public function __construct($arguments) {
     
     $arguments = array(
       'description' => t('Migration of authmap table from Ding1/D6'),
       'machine_name' => 'DingAuthmap',
+      'group_name' => 'ding1_group',
       'source_table' => 'authmap',
       'destination_table' => 'authmap',
       'dependencies' => array('DingUser'),

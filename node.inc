@@ -118,13 +118,15 @@ class DingLibraryMigration extends DingNodeMigration {
          ->defaultValue('MigrateFileFid');
     $this->addFieldMapping('field_ding_library_list_image:language')
          ->defaultValue('und');
-    // Mapping remaining list image fields
+    $this->addFieldMapping('field_ding_library_list_image:preserve_files')
+         ->defaultValue(FALSE);
     $this->addFieldMapping('field_ding_library_list_image:alt', 'list_image_alt');
     $this->addFieldMapping('field_ding_library_list_image:title', 'list_image_title');
     $this->addFieldMapping(NULL, 'field_list_image:data')
          ->description(t('Split this into list_image_alt and list_image_title for D7'));
     $this->addFieldMapping(NULL, 'field_list_image:list');
-
+    $this->addFieldMapping(NULL, 'field_list_image:alt');
+    
     // Map the image field to the new title image field, base this on the DingFile migration
     // to map the files to the imported files table.
     $this->addFieldMapping('field_ding_library_title_image', 'field_image')
@@ -133,77 +135,43 @@ class DingLibraryMigration extends DingNodeMigration {
          ->defaultValue('MigrateFileFid');
     $this->addFieldMapping('field_ding_library_title_image:language')
          ->defaultValue('und');
-    // Mapping remaining title image fields
+    $this->addFieldMapping('field_ding_library_title_image:preserve_files')
+         ->defaultValue(FALSE);
     $this->addFieldMapping('field_ding_library_title_image:alt', 'image_alt');
     $this->addFieldMapping('field_ding_library_title_image:title', 'image_title');
     $this->addFieldMapping(NULL, 'field_image:data')
          ->description(t('Split this into image_alt and image_title for D7'));
     $this->addFieldMapping(NULL, 'field_image:list');
-
+    $this->addFieldMapping(NULL, 'field_image:alt');
+    
     $this->addFieldMapping(NULL, 'field_content_images')
          ->description(t('content images are not mapped to Ding2/D7'));
     $this->addFieldMapping(NULL, 'field_content_images:list');
     $this->addFieldMapping(NULL, 'field_content_images:data');
+    $this->addFieldMapping(NULL, 'field_content_images:alt');
     
-    // Map to addressfield. See addressfield.inc in migrate_extras for available argument keys.
-    $address_arguments = array(
-      'thoroughfare' => array('source_field' => 'street'),
-      'premise' => array('source_field' => 'additional'),
-      'locality' => array('source_field' => 'city'),
-      'administrative_area' => array('source_field' => 'province'),
-      'postal_code' => array('source_field' => 'postal_code'),
-      'name_line' => array('source_field' => 'name'),
-    );
-    // Note that of the country field is NULL, none of the values will be migrated!
-    $this->addFieldMapping('field_ding_library_addresse', 'country')
-         ->arguments($address_arguments);
- 
-    // Since the excerpt is mapped via an argument, add a null mapping so it's not flagged as unmapped.
-    $this->addFieldMapping(NULL, 'name');
-    $this->addFieldMapping(NULL, 'street');
-    $this->addFieldMapping(NULL, 'additional');
-    $this->addFieldMapping(NULL, 'city');
-    $this->addFieldMapping(NULL, 'province');
-    $this->addFieldMapping(NULL, 'postal_code');
-    $this->addFieldMapping(NULL, 'country');
-    $this->addFieldMapping(NULL, 'latitude');
-    $this->addFieldMapping(NULL, 'longitude');
-    $this->addFieldMapping(NULL, 'lid');
+    // Map to addressfield. See https://drupal.org/node/1996546.
+    $this->addFieldMapping('field_ding_library_addresse', 'country');
+    $this->addFieldMapping('field_ding_library_addresse:thoroughfare', 'street');
+    $this->addFieldMapping('field_ding_library_addresse:premise', 'additional');
+    $this->addFieldMapping('field_ding_library_addresse:locality', 'city');
+    $this->addFieldMapping('field_ding_library_addresse:administrative_area', 'province');
+    $this->addFieldMapping('field_ding_library_addresse:postal_code', 'postal_code');
+    $this->addFieldMapping('field_ding_library_addresse:name_line', 'name');
     
-    // Map to geofield. See geofield.inc in migrate_extras for available argument keys.
-    $geo_arguments = array(
-      'lat' => array('source_field' => 'latitude'),
-      'lon' => array('source_field' => 'longitude'),
-    );
+    // Map to geofield.
     $this->addFieldMapping('field_ding_library_geocode')
-         ->defaultValue('Point')
-         ->arguments($geo_arguments);
-    // Since the excerpt is mapped via an argument, add a null mapping so it's not flagged as unmapped.
-    $this->addFieldMapping(NULL, 'latitude');
-    $this->addFieldMapping(NULL, 'longitude');
-
-    // Mapping taxonomies
-    $this->addFieldMapping(NULL, '2');
-
-    // opening_hours fields relates to the module office_hours in Ding1/D6, and should not be mapped - this module is not used i Ding2/D7
-    $this->addFieldMapping(NULL, 'field_opening_hours')
-         ->description(t('Not mapped - Ding2/D7 uses the opening_hours module instead of office_hours module. This is handled by separate migration of the opening_hours table'));
-    $this->addFieldMapping(NULL, 'field_opening_hours:week_start');
-    $this->addFieldMapping(NULL, 'field_opening_hours:week_end');
-    $this->addFieldMapping(NULL, 'field_opening_hours:sun_open');
-    $this->addFieldMapping(NULL, 'field_opening_hours:sun_close');
-    $this->addFieldMapping(NULL, 'field_opening_hours:mon_open');
-    $this->addFieldMapping(NULL, 'field_opening_hours:mon_close');
-    $this->addFieldMapping(NULL, 'field_opening_hours:tue_open');
-    $this->addFieldMapping(NULL, 'field_opening_hours:tue_close');
-    $this->addFieldMapping(NULL, 'field_opening_hours:wed_open');
-    $this->addFieldMapping(NULL, 'field_opening_hours:wed_close');
-    $this->addFieldMapping(NULL, 'field_opening_hours:thu_open');
-    $this->addFieldMapping(NULL, 'field_opening_hours:thu_close');
-    $this->addFieldMapping(NULL, 'field_opening_hours:fri_open');
-    $this->addFieldMapping(NULL, 'field_opening_hours:fri_close');
-    $this->addFieldMapping(NULL, 'field_opening_hours:sat_open');
-    $this->addFieldMapping(NULL, 'field_opening_hours:sat_close');
+         ->defaultValue('POINT (x x)');
+    $this->addFieldMapping('field_ding_library_geocode:geo_type')
+         ->defaultValue('point');
+    $this->addFieldMapping('field_ding_library_geocode:lat', 'latitude');
+    $this->addFieldMapping('field_ding_library_geocode:top', 'latitude');
+    $this->addFieldMapping('field_ding_library_geocode:bottom', 'latitude');
+    $this->addFieldMapping('field_ding_library_geocode:lon', 'longitude');
+    $this->addFieldMapping('field_ding_library_geocode:left', 'longitude');
+    $this->addFieldMapping('field_ding_library_geocode:right', 'longitude');
+    $this->addFieldMapping(NULL, 'lid')
+         ->issueGroup(t('DNM'));
 
     // The opening_hours field in Ding2/D7 will be handled by migrating the opening_hours table of the module opening_hours
     $this->addFieldMapping('field_ding_library_opening_hours')
@@ -219,14 +187,93 @@ class DingLibraryMigration extends DingNodeMigration {
     $this->addFieldMapping('field_ding_library_links:language')
          ->defaultValue('und');
 
-    // Misc. mappings
+    // Unmapped source fields
+    $this->addFieldMapping(NULL, '2')
+         ->description(t('Ding2 does not employ the Tags taxonomy (taxonomy "2") for library nodes'))
+         ->issueGroup(t('DNM'));
     $this->addFieldMapping(NULL, 'field_pc_booking_method')
-         ->description(t('Ding2/D7 does not employ pc booking'));
+         ->description(t('Ding2/D7 does not employ pc booking'))
+         ->issueGroup(t('DNM'));
     $this->addFieldMapping(NULL, 'field_pc_booking_url')
-         ->description(t('Ding2/D7 does not employ pc booking'));
+         ->description(t('Ding2/D7 does not employ pc booking'))
+         ->issueGroup(t('DNM'));
     $this->addFieldMapping(NULL, 'field_feature_ref')
-         ->description(t('Ding2/D7 does not employ feature nodes'));
+         ->description(t('Ding2/D7 does not employ feature nodes'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'revision')
+         ->description(t('Migration of revisions is possible, but not implemented in this migration'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'log')
+         ->description(t('Migration of revisions is possible, but not implemented in this migration'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'revision_uid')
+         ->description(t('Migration of revisions is possible, but not implemented in this migration'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_opening_hours')
+         ->description(t('Ding2/D7 uses the opening_hours module instead of office_hours module. Handled by separate migration of the opening_hours table'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_opening_hours:week_start')
+         ->description(t('Ding2/D7 uses the opening_hours module instead of office_hours module. Handled by separate migration of the opening_hours table'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_opening_hours:week_end')
+         ->description(t('Ding2/D7 uses the opening_hours module instead of office_hours module. Handled by separate migration of the opening_hours table'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_opening_hours:sun_open')
+         ->description(t('Ding2/D7 uses the opening_hours module instead of office_hours module. Handled by separate migration of the opening_hours table'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_opening_hours:sun_close')
+         ->description(t('Ding2/D7 uses the opening_hours module instead of office_hours module. Handled by separate migration of the opening_hours table'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_opening_hours:mon_open')
+         ->description(t('Ding2/D7 uses the opening_hours module instead of office_hours module. Handled by separate migration of the opening_hours table'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_opening_hours:mon_close')
+         ->description(t('Ding2/D7 uses the opening_hours module instead of office_hours module. Handled by separate migration of the opening_hours table'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_opening_hours:tue_open')
+         ->description(t('Ding2/D7 uses the opening_hours module instead of office_hours module. Handled by separate migration of the opening_hours table'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_opening_hours:tue_close')
+         ->description(t('Ding2/D7 uses the opening_hours module instead of office_hours module. Handled by separate migration of the opening_hours table'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_opening_hours:wed_open')
+         ->description(t('Ding2/D7 uses the opening_hours module instead of office_hours module. Handled by separate migration of the opening_hours table'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_opening_hours:wed_close')
+         ->description(t('Ding2/D7 uses the opening_hours module instead of office_hours module. Handled by separate migration of the opening_hours table'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_opening_hours:thu_open')
+         ->description(t('Ding2/D7 uses the opening_hours module instead of office_hours module. Handled by separate migration of the opening_hours table'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_opening_hours:thu_close')
+         ->description(t('Ding2/D7 uses the opening_hours module instead of office_hours module. Handled by separate migration of the opening_hours table'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_opening_hours:fri_open')
+         ->description(t('Ding2/D7 uses the opening_hours module instead of office_hours module. Handled by separate migration of the opening_hours table'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_opening_hours:fri_close')
+         ->description(t('Ding2/D7 uses the opening_hours module instead of office_hours module. Handled by separate migration of the opening_hours table'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_opening_hours:sat_open')
+         ->description(t('Ding2/D7 uses the opening_hours module instead of office_hours module. Handled by separate migration of the opening_hours table'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_opening_hours:sat_close')
+         ->description(t('Ding2/D7 uses the opening_hours module instead of office_hours module. Handled by separate migration of the opening_hours table'))
+         ->issueGroup(t('DNM'));
 
+    // Unmapped destination fields
+    $this->addUnmigratedDestinations(array(
+      'field_ding_library_addresse:sub_administrative_area',
+      'field_ding_library_addresse:dependent_locality',
+      'field_ding_library_addresse:sub_premise',
+      'field_ding_library_addresse:organisation_name',
+      'field_ding_library_addresse:first_name',
+      'field_ding_library_addresse:last_name',
+      'field_ding_library_addresse:data',
+      'field_ding_library_geocode:srid',
+      'field_ding_library_geocode:accuracy',
+      'field_ding_library_geocode:source',
+    ));
   }
 
   public function prepareRow($row) {
@@ -337,10 +384,13 @@ class DingCampaignMigration extends DingNodeMigration {
          
     // Unmapped source fields
     $this->addFieldMapping(NULL, 'revision')
+         ->description(t('Migration of revisions is possible, but not implemented in this migration'))
          ->issueGroup(t('DNM'));
     $this->addFieldMapping(NULL, 'log')
+         ->description(t('Migration of revisions is possible, but not implemented in this migration'))
          ->issueGroup(t('DNM'));
     $this->addFieldMapping(NULL, 'revision_uid')
+         ->description(t('Migration of revisions is possible, but not implemented in this migration'))
          ->issueGroup(t('DNM'));
   }
   

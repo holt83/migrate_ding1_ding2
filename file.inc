@@ -25,7 +25,13 @@ class DingFileMigration extends DrupalFile6Migration {
     $this->addFieldMapping('destination_file', 'filepath')
          ->description(t('filepath is stripped of sites/default/files/ before being copied over'))
          ->callbacks(array($this, 'cleanFilepath'));
+    // urlencode option, see https://drupal.org/node/1540106#urlencode
+    $this->addFieldMapping('urlencode')
+         ->description(t('urlencode set to TRUE has no effect on this migration, but we set it anyway'))
+         ->defaultValue(1);
 
+    // Unmapped destination fields
+    $this->addUnmigratedDestinations(array('path'));
   }
   
   //Function to strip "sites/default/files/" from destination_file

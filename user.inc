@@ -22,18 +22,23 @@ class DingUserMigration extends DrupalUser6Migration {
       'field_image', 
       'field_image:list', 
       'field_image:data', 
+      'field_image:alt', 
       'field_multi_library_ref',
       'field_staff_title', 
       'field_work_area', 
       'field_firstname', 
       'field_phone', 
       'field_surname', 
-      '2', 
+      '2',
+      'field_profile_title',
+      'field_profile_body',
     ));
 
     // Unmapped destination fields
     $this->addUnmigratedDestinations(array(
       'group_audience',
+      'group_audience:state',
+      'group_audience:created',
     ));
 
   }

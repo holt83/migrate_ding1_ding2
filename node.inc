@@ -332,14 +332,16 @@ class DingCampaignMigration extends DingNodeMigration {
          ->defaultValue('MigrateFileFid');
     $this->addFieldMapping('field_camp_image:language')
          ->defaultValue('und');
-
-    // This is a shortcut you can use to mark several destination fields as DNM
-    // at once
-    /*
-    $this->addUnmigratedDestinations(array(
-      '2',
-    ));
-    */
+    $this->addFieldMapping('field_camp_image:preserve_files')
+         ->defaultValue(FALSE);
+         
+    // Unmapped source fields
+    $this->addFieldMapping(NULL, 'revision')
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'log')
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'revision_uid')
+         ->issueGroup(t('DNM'));
   }
   
   public function prepareRow($row) {

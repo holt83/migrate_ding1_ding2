@@ -333,7 +333,7 @@ class DingCampaignMigration extends DingNodeMigration {
       'group_name' => 'ding1_group',
       'source_type' => 'campaign',
       'destination_type' => 'ding_campaign',
-      'dependencies' => array('DingUser'),
+      'dependencies' => array('DingUser', 'DingFile'),
     );
 
     // Add to sourceFields before calling parent constructor. 

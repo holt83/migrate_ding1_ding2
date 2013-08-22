@@ -434,8 +434,6 @@ class DingPageMigration extends DingNodeMigration {
 
     // Add to sourceFields before calling parent constructor. 
     // See http://www.acquia.com/blog/drupal-drupal-data-migration-part-2-architecture
-    $this->sourceFields['file_attachments_description'] = t('Description text extracted from field_file_attachments_data');
-    $this->sourceFields['list_image_alt'] = t('Alt text extracted from field_list_image_data');
     $this->sourceFields['list_image_title'] = t('Title text extracted from field_list_image_data');
     
     parent::__construct($arguments);
@@ -456,12 +454,12 @@ class DingPageMigration extends DingNodeMigration {
          ->defaultValue('MigrateFileFid');
     $this->addFieldMapping('field_ding_page_files:language')
          ->defaultValue('und');
+    $this->addFieldMapping('field_ding_page_files:preserve_files')
+         ->defaultValue(FALSE);
     // Mapping remaining page file fields
-    $this->addFieldMapping('field_ding_page_files:description', 'file_attachments_description');
-    $this->addFieldMapping(NULL, 'field_file_attachments:data')
-         ->description(t('Split this into description for D7'));
-    $this->addFieldMapping('field_ding_page_files:display', 'file_attachments_description')
-         ->description(t('Use file_attachments_description again for this value - nothing else to map from source'));
+    $this->addFieldMapping('field_ding_page_files:description', 'field_file_attachments:description');
+    $this->addFieldMapping('field_ding_page_files:display', 'field_file_attachments:description')
+         ->description(t('Use file_attachments_description again for this value'));
 
     // Map the list image field to the new list image field, base this on the DingFile migration
     // to map the files to the imported files table.
@@ -471,11 +469,13 @@ class DingPageMigration extends DingNodeMigration {
          ->defaultValue('MigrateFileFid');
     $this->addFieldMapping('field_ding_page_list_image:language')
          ->defaultValue('und');
+    $this->addFieldMapping('field_ding_page_list_image:preserve_files')
+         ->defaultValue(FALSE);
     // Mapping remaining list image fields
-    $this->addFieldMapping('field_ding_page_list_image:alt', 'list_image_alt');
+    $this->addFieldMapping('field_ding_page_list_image:alt', 'field_list_image:alt');
     $this->addFieldMapping('field_ding_page_list_image:title', 'list_image_title');
     $this->addFieldMapping(NULL, 'field_list_image:data')
-         ->description(t('Split this into list_image_alt and list_image_title for D7'));
+         ->description(t('Split this into list_image_title for D7'));
     $this->addFieldMapping(NULL, 'field_list_image:list');
 
     // ting references
@@ -496,13 +496,27 @@ class DingPageMigration extends DingNodeMigration {
     $this->addFieldMapping('field_ding_page_tags:ignore_case')
          ->defaultValue(TRUE);
 
-    // Add null mappings so sources are not flagged as unmapped.
-    $this->addFieldMapping(NULL, 'field_content_images');
-    $this->addFieldMapping(NULL, 'field_content_images:list');
-    $this->addFieldMapping(NULL, 'field_content_images:data');
-    $this->addFieldMapping(NULL, 'field_file_attachments:list');
+    // Unmapped source fields
+    $this->addFieldMapping(NULL, 'revision')
+         ->description(t('Migration of revisions is possible, but not implemented in this migration'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'log')
+         ->description(t('Migration of revisions is possible, but not implemented in this migration'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'revision_uid')
+         ->description(t('Migration of revisions is possible, but not implemented in this migration'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_content_images')
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_content_images:list')
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_content_images:alt')
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_file_attachments:list')
+         ->issueGroup(t('DNM'));
     $this->addFieldMapping(NULL, 'field_library_ref')
-         ->description(t('Not mapped - Ding2 does not relate pages to libraries'));
+         ->description(t('Not mapped - Ding2 does not relate pages to libraries'))
+         ->issueGroup(t('DNM'));
 
     // Unmapped destination fields
     $this->addUnmigratedDestinations(array(
@@ -516,6 +530,7 @@ class DingPageMigration extends DingNodeMigration {
       'field_ding_page_title_image:file_replace', 
       'field_ding_page_title_image:preserve_files', 
       'field_ding_page_title_image:source_dir',
+      'field_ding_page_title_image:urlencode',
       'field_ding_page_materials',
     ));
     
@@ -561,8 +576,6 @@ class DingNewsMigration extends DingNodeMigration {
 
     // Add to sourceFields before calling parent constructor. 
     // See http://www.acquia.com/blog/drupal-drupal-data-migration-part-2-architecture
-    $this->sourceFields['file_attachments_description'] = t('Description text extracted from field_file_attachments_data');
-    $this->sourceFields['list_image_alt'] = t('Alt text extracted from field_list_image_data');
     $this->sourceFields['list_image_title'] = t('Title text extracted from field_list_image_data');
 
     parent::__construct($arguments);
@@ -585,12 +598,12 @@ class DingNewsMigration extends DingNodeMigration {
          ->defaultValue('MigrateFileFid');
     $this->addFieldMapping('field_ding_news_files:language')
          ->defaultValue('und');
-    // Mapping remaining page file fields
-    $this->addFieldMapping('field_ding_news_files:description', 'file_attachments_description');
-    $this->addFieldMapping(NULL, 'field_file_attachments:data')
-         ->description(t('Split this into description for D7'));
+    $this->addFieldMapping('field_ding_news_files:preserve_files')
+         ->defaultValue(FALSE);
+    // Mapping remaining news file fields
+    $this->addFieldMapping('field_ding_news_files:description', 'field_file_attachments:description');
     $this->addFieldMapping('field_ding_news_files:display', 'file_attachments_description')
-         ->description(t('Use file_attachments_description again for this value - nothing else to map from source'));
+         ->description(t('Use file_attachments_description again for this value'));
 
     // Map the list image field to the new list image field, base this on the DingFile migration
     // to map the files to the imported files table.
@@ -600,11 +613,11 @@ class DingNewsMigration extends DingNodeMigration {
          ->defaultValue('MigrateFileFid');
     $this->addFieldMapping('field_ding_news_list_image:language')
          ->defaultValue('und');
+    $this->addFieldMapping('field_ding_news_list_image:preserve_files')
+         ->defaultValue(FALSE);
     // Mapping remaining list image fields
-    $this->addFieldMapping('field_ding_news_list_image:alt', 'list_image_alt');
+    $this->addFieldMapping('field_ding_news_list_image:alt', 'field_list_image:alt');
     $this->addFieldMapping('field_ding_news_list_image:title', 'list_image_title');
-    $this->addFieldMapping(NULL, 'field_list_image:data')
-         ->description(t('Split this into list_image_alt and list_image_title for D7'));
     $this->addFieldMapping(NULL, 'field_list_image:list');
 
     // ting references
@@ -635,11 +648,24 @@ class DingNewsMigration extends DingNodeMigration {
     $this->addFieldMapping('field_ding_news_tags:ignore_case')
          ->defaultValue(TRUE);
 
-    // Add null mappings so sources are not flagged as unmapped.
-    $this->addFieldMapping(NULL, 'field_content_images');
-    $this->addFieldMapping(NULL, 'field_content_images:list');
-    $this->addFieldMapping(NULL, 'field_content_images:data');
-    $this->addFieldMapping(NULL, 'field_file_attachments:list');
+    // Unmapped source fields
+    $this->addFieldMapping(NULL, 'revision')
+         ->description(t('Migration of revisions is possible, but not implemented in this migration'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'log')
+         ->description(t('Migration of revisions is possible, but not implemented in this migration'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'revision_uid')
+         ->description(t('Migration of revisions is possible, but not implemented in this migration'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_content_images')
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_content_images:list')
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_content_images:alt')
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_file_attachments:list')
+         ->issueGroup(t('DNM'));
 
     // Unmapped destination fields
     $this->addUnmigratedDestinations(array(
@@ -653,8 +679,11 @@ class DingNewsMigration extends DingNodeMigration {
       'field_ding_news_title_image:file_replace', 
       'field_ding_news_title_image:preserve_files', 
       'field_ding_news_title_image:source_dir',
+      'field_ding_news_title_image:urlencode',
       'field_ding_news_library',
       'field_ding_news_materials',
+      'field_ding_news_library:state',
+      'field_ding_news_library:created',
     ));
 
   }
@@ -666,13 +695,8 @@ class DingNewsMigration extends DingNodeMigration {
     }
     
     // Get values from serialized data and populate the source fields defined in our constructor
-    // file attachments
-    $file_attachments_data = unserialize($row->field_file_attachments_data);
-    $row->file_attachments_description = $file_attachments_data['description'];
-
     // list images
     $list_image_data = unserialize($row->field_list_image_data);
-    $row->list_image_alt = $list_image_data['alt'];
     $row->list_image_title = $list_image_data['title'];
   }
 
@@ -724,7 +748,6 @@ class DingEventMigration extends DingNodeMigration {
 
     // Add to sourceFields before calling parent constructor. 
     // See http://www.acquia.com/blog/drupal-drupal-data-migration-part-2-architecture
-    $this->sourceFields['file_attachments_description'] = t('Description text extracted from field_file_attachments_data');
     $this->sourceFields['list_image_alt'] = t('Alt text extracted from field_list_image_data');
     $this->sourceFields['list_image_title'] = t('Title text extracted from field_list_image_data');
     
@@ -740,10 +763,8 @@ class DingEventMigration extends DingNodeMigration {
          ->defaultValue('und');
     $this->addFieldMapping(NULL, 'field_library_ref')
          ->description(t('Handled in prepare function'));
-    $this->addFieldMapping('field_ding_event_date', 'field_datetime')
-         ->description(t('Handled in prepareRow function'));
-    // Add NULL mapping so to-date is not flagged as unmapped
-    $this->addFieldMapping(NULL, 'field_datetime:value2');
+    $this->addFieldMapping('field_ding_event_date', 'field_datetime');
+    $this->addFieldMapping('field_ding_event_date:value2', 'field_datetime:value2');
     $this->addFieldMapping('field_ding_event_price', 'field_entry_price');
 
     // Files mapping
@@ -753,12 +774,12 @@ class DingEventMigration extends DingNodeMigration {
          ->defaultValue('MigrateFileFid');
     $this->addFieldMapping('field_ding_event_files:language')
          ->defaultValue('und');
+    $this->addFieldMapping('field_ding_event_files:preserve_files')
+         ->defaultValue(FALSE);
     // Mapping remaining page file fields
-    $this->addFieldMapping('field_ding_event_files:description', 'file_attachments_description');
-    $this->addFieldMapping(NULL, 'field_file_attachments:data')
-         ->description(t('Split this into description for D7'));
-    $this->addFieldMapping('field_ding_event_files:display', 'file_attachments_description')
-         ->description(t('Use file_attachments_description again for this value - nothing else to map from source'));
+    $this->addFieldMapping('field_ding_event_files:description', 'field_file_attachments:description');
+    $this->addFieldMapping('field_ding_event_files:display', 'field_file_attachments:description')
+         ->description(t('Use field_file_attachments:description again for this value'));
 
     // Map the list image field to the new list image field, base this on the DingFile migration
     // to map the files to the imported files table.
@@ -768,33 +789,26 @@ class DingEventMigration extends DingNodeMigration {
          ->defaultValue('MigrateFileFid');
     $this->addFieldMapping('field_ding_event_list_image:language')
          ->defaultValue('und');
+    $this->addFieldMapping('field_ding_event_list_image:preserve_files')
+         ->defaultValue(FALSE);
     // Mapping remaining list image fields
     $this->addFieldMapping('field_ding_event_list_image:alt', 'list_image_alt');
     $this->addFieldMapping('field_ding_event_list_image:title', 'list_image_title');
     $this->addFieldMapping(NULL, 'field_list_image:data')
          ->description(t('Split this into list_image_alt and list_image_title for D7'));
     $this->addFieldMapping(NULL, 'field_list_image:list');
+    $this->addFieldMapping(NULL, 'field_list_image:alt');
 
-    // Map to addressfield. See addressfield.inc in migrate_extras for available argument keys.
-    $address_arguments = array(
-      'thoroughfare' => array('source_field' => 'street'),
-      'premise' => array('source_field' => 'additional'),
-      'locality' => array('source_field' => 'city'),
-      'administrative_area' => array('source_field' => 'province'),
-      'postal_code' => array('source_field' => 'postal_code'),
-      'name_line' => array('source_field' => 'name'),
-    );
-    // Note that of the country field is NULL, none of the values will be migrated!
-    $this->addFieldMapping('field_ding_event_location', 'country')
-         ->arguments($address_arguments);
+    // Map to addressfield. See https://drupal.org/node/1996546.
+    $this->addFieldMapping('field_ding_event_location', 'country');
+    $this->addFieldMapping('field_ding_event_location:thoroughfare', 'street');
+    $this->addFieldMapping('field_ding_event_location:premise', 'additional');
+    $this->addFieldMapping('field_ding_event_location:locality', 'city');
+    $this->addFieldMapping('field_ding_event_location:administrative_area', 'province');
+    $this->addFieldMapping('field_ding_event_location:postal_code', 'postal_code');
+    $this->addFieldMapping('field_ding_event_location:name_line', 'name');
+    
     // Since the excerpt is mapped via an argument, add a null mapping so it's not flagged as unmapped.
-    $this->addFieldMapping(NULL, 'name');
-    $this->addFieldMapping(NULL, 'street');
-    $this->addFieldMapping(NULL, 'additional');
-    $this->addFieldMapping(NULL, 'city');
-    $this->addFieldMapping(NULL, 'province');
-    $this->addFieldMapping(NULL, 'postal_code');
-    $this->addFieldMapping(NULL, 'country');
     $this->addFieldMapping(NULL, 'latitude');
     $this->addFieldMapping(NULL, 'longitude');
     $this->addFieldMapping(NULL, 'lid');
@@ -837,11 +851,24 @@ class DingEventMigration extends DingNodeMigration {
     $this->addFieldMapping('field_ding_event_tags:ignore_case')
          ->defaultValue(TRUE);
 
-    // Add null mappings so sources are not flagged as unmapped.
-    $this->addFieldMapping(NULL, 'field_content_images');
-    $this->addFieldMapping(NULL, 'field_content_images:list');
-    $this->addFieldMapping(NULL, 'field_content_images:data');
-    $this->addFieldMapping(NULL, 'field_file_attachments:list');
+    // Unmapped source fields
+    $this->addFieldMapping(NULL, 'field_content_images')
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_content_images:list')
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_content_images:alt')
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_file_attachments:list')
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'revision')
+         ->description(t('Migration of revisions is possible, but not implemented in this migration'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'log')
+         ->description(t('Migration of revisions is possible, but not implemented in this migration'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'revision_uid')
+         ->description(t('Migration of revisions is possible, but not implemented in this migration'))
+         ->issueGroup(t('DNM'));
 
     // Unmapped destination fields
     $this->addUnmigratedDestinations(array(
@@ -855,8 +882,20 @@ class DingEventMigration extends DingNodeMigration {
       'field_ding_event_title_image:file_replace', 
       'field_ding_event_title_image:preserve_files', 
       'field_ding_event_title_image:source_dir',
+      'field_ding_event_title_image:urlencode',
       'field_ding_event_library',
       'field_ding_event_materials',
+      'field_ding_event_library:state',
+      'field_ding_event_library:created',
+      'field_ding_event_location:sub_administrative_area',
+      'field_ding_event_location:dependent_locality',
+      'field_ding_event_location:sub_premise',
+      'field_ding_event_location:organisation_name',
+      'field_ding_event_location:first_name',
+      'field_ding_event_location:last_name',
+      'field_ding_event_location:data',
+      'field_place2book_tickets', // If this field shows up in the list of destination fields, it should be ignored
+      'field_place2book_tickets:language', // If this field shows up in the list of destination fields, it should be ignored
     ));
 
   }
@@ -868,10 +907,6 @@ class DingEventMigration extends DingNodeMigration {
     }
     
     // Get values from serialized data and populate the source fields defined in our constructor
-    // file attachments
-    $file_attachments_data = unserialize($row->field_file_attachments_data);
-    $row->file_attachments_description = $file_attachments_data['description'];
-
     // list images
     $list_image_data = unserialize($row->field_list_image_data);
     $row->list_image_alt = $list_image_data['alt'];

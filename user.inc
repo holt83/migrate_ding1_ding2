@@ -21,7 +21,6 @@ class DingUserMigration extends DrupalUser6Migration {
       'field_department', 
       'field_image', 
       'field_image:list', 
-      'field_image:data', 
       'field_image:alt', 
       'field_multi_library_ref',
       'field_staff_title', 

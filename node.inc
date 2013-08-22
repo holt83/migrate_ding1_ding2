@@ -78,9 +78,7 @@ class DingLibraryMigration extends DingNodeMigration {
 
     // Add to sourceFields before calling parent constructor. 
     // See http://www.acquia.com/blog/drupal-drupal-data-migration-part-2-architecture
-    $this->sourceFields['list_image_alt'] = t('Alt text extracted from field_list_image_data');
     $this->sourceFields['list_image_title'] = t('Title text extracted from field_list_image_data');
-    $this->sourceFields['image_alt'] = t('Alt text extracted from field_image_data');
     $this->sourceFields['image_title'] = t('Title text extracted from field_image_data');
     
     parent::__construct($arguments);
@@ -120,12 +118,11 @@ class DingLibraryMigration extends DingNodeMigration {
          ->defaultValue('und');
     $this->addFieldMapping('field_ding_library_list_image:preserve_files')
          ->defaultValue(FALSE);
-    $this->addFieldMapping('field_ding_library_list_image:alt', 'list_image_alt');
+    $this->addFieldMapping('field_ding_library_list_image:alt', 'field_list_image:alt');
     $this->addFieldMapping('field_ding_library_list_image:title', 'list_image_title');
     $this->addFieldMapping(NULL, 'field_list_image:data')
-         ->description(t('Split this into list_image_alt and list_image_title for D7'));
+         ->description(t('Split this into list_image_title for D7'));
     $this->addFieldMapping(NULL, 'field_list_image:list');
-    $this->addFieldMapping(NULL, 'field_list_image:alt');
     
     // Map the image field to the new title image field, base this on the DingFile migration
     // to map the files to the imported files table.
@@ -137,18 +134,11 @@ class DingLibraryMigration extends DingNodeMigration {
          ->defaultValue('und');
     $this->addFieldMapping('field_ding_library_title_image:preserve_files')
          ->defaultValue(FALSE);
-    $this->addFieldMapping('field_ding_library_title_image:alt', 'image_alt');
+    $this->addFieldMapping('field_ding_library_title_image:alt', 'field_image:alt');
     $this->addFieldMapping('field_ding_library_title_image:title', 'image_title');
     $this->addFieldMapping(NULL, 'field_image:data')
-         ->description(t('Split this into image_alt and image_title for D7'));
+         ->description(t('Split this into image_title for D7'));
     $this->addFieldMapping(NULL, 'field_image:list');
-    $this->addFieldMapping(NULL, 'field_image:alt');
-    
-    $this->addFieldMapping(NULL, 'field_content_images')
-         ->description(t('content images are not mapped to Ding2/D7'));
-    $this->addFieldMapping(NULL, 'field_content_images:list');
-    $this->addFieldMapping(NULL, 'field_content_images:data');
-    $this->addFieldMapping(NULL, 'field_content_images:alt');
     
     // Map to addressfield. See https://drupal.org/node/1996546.
     $this->addFieldMapping('field_ding_library_addresse', 'country');
@@ -161,7 +151,7 @@ class DingLibraryMigration extends DingNodeMigration {
     
     // Map to geofield.
     $this->addFieldMapping('field_ding_library_geocode')
-         ->defaultValue('POINT (x x)');
+         ->defaultValue('point');
     $this->addFieldMapping('field_ding_library_geocode:geo_type')
          ->defaultValue('point');
     $this->addFieldMapping('field_ding_library_geocode:lat', 'latitude');
@@ -188,6 +178,16 @@ class DingLibraryMigration extends DingNodeMigration {
          ->defaultValue('und');
 
     // Unmapped source fields
+    $this->addFieldMapping(NULL, 'field_content_images')
+         ->description(t('content images are not mapped to Ding2/D7'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_content_images:list')
+         ->description(t('content images are not mapped to Ding2/D7'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_content_images:alt')
+         ->description(t('content images are not mapped to Ding2/D7'))
+         ->issueGroup(t('DNM'));
+    
     $this->addFieldMapping(NULL, '2')
          ->description(t('Ding2 does not employ the Tags taxonomy (taxonomy "2") for library nodes'))
          ->issueGroup(t('DNM'));

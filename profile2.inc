@@ -217,8 +217,6 @@ class DingProfileStaffMigration extends Migration {
     if (parent::prepareRow($row) === FALSE) {
        return FALSE;
     }
-    // Logging
-    watchdog('migrate_ding1_ding2', 'row data: %rowdata', array('%rowdata'=>print_r($row)), WATCHDOG_INFO);
   }
 
   // Modify the query to include content profile data

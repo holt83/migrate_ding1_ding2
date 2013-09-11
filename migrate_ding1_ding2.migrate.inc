@@ -26,6 +26,7 @@ function migrate_ding1_ding2_migrate_api() {
       'DingRole' => array('class_name' => 'DingRoleMigration'),
       'DingUser' => array('class_name' => 'DingUserMigration'),
       'DingProfileProviderAlma' => array('class_name' => 'DingProfileProviderAlmaMigration'),
+      'DingProfileStaff' => array('class_name' => 'DingProfileStaffMigration'),
 
       // Taxonomies
       'DingEventCategoryTerm' => array('class_name' => 'DingEventCategoryTermMigration'),

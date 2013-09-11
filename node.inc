@@ -901,6 +901,11 @@ class DingEventMigration extends DingNodeMigration {
   }
 
   public function prepareRow($row) {
+    // Make sure that this migration only runs if ding_place2book is turned OFF on the site
+    if (module_exists('ding_place2book')) {
+      throw new MigrateException(t('Turn ding_place2book module OFF before running DingEventMigration'));
+    }
+    
     // Always include this snippet, in case our parent class decides to ignore the row
     if (parent::prepareRow($row) === FALSE) {
        return FALSE;

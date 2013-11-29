@@ -3,8 +3,11 @@
  * @file
  * Classes for migrating into Ding2/D7 Profile2 entities.
  */
+
 class DingProfileProviderAlmaMigration extends Migration {
+  
   public function __construct($arguments) {
+    
     global $user;
     
     $this->team = array(
@@ -18,10 +21,6 @@ class DingProfileProviderAlmaMigration extends Migration {
       'group_name' => 'ding1_group',
     );
 
-    // Add to sourceFields before calling parent constructor. 
-    // See http://www.acquia.com/blog/drupal-drupal-data-migration-part-2-architecture
-    $this->sourceFields['interest_period'] = t('Interest period extracted from field data');
-
     parent::__construct($arguments);
 
     $this->map = new MigrateSQLMap($this->machineName,
@@ -34,9 +33,14 @@ class DingProfileProviderAlmaMigration extends Migration {
       ),
       MigrateDestinationProfile2::getKeySchema()
     );
-
+    
+    // Provide our own description of the interest_period field from the source.
+    $source_fields = array(
+      'interest_period' => t('Interest period extracted from field data')
+    );
+    
     // Create a MigrateSource object, which manages retrieving the input data.
-    $this->source = new MigrateSourceSQL($this->query(), $this->sourceFields, NULL);
+    $this->source = new MigrateSourceSQL($this->query(), $source_fields, NULL);
 
     $this->destination = new MigrateDestinationProfile2('provider_alma');
 
@@ -131,6 +135,7 @@ class DingProfileProviderAlmaMigration extends Migration {
     $query->condition('name','%@alma_user', 'LIKE');
     return $query;
   }
+  
 }
 
 
@@ -140,6 +145,7 @@ class DingProfileStaffMigration extends Migration {
     
     $this->team = array(
       new MigrateTeamMember('Ewan Andreasen', 'ea@vejlebib.dk', t('Webdeveloper (Ding1 -> Ding2 Migration)')),
+      new MigrateTeamMember('Simon Holt', 'sh@randersbib.dk', t('Webdeveloper (Ding1 -> Ding2 Migration)')),
     );
     $this->description = t('Migration of user content profile data from Ding1/D6');
     $this->dependencies = array('DingUser', 'DingFile', 'DingLibrary');
@@ -196,6 +202,7 @@ class DingProfileStaffMigration extends Migration {
     $this->addFieldMapping('field_ding_staff_phone:language')
          ->defaultValue('und');
     $this->addFieldMapping('field_ding_staff_email', 'mail');
+    
 
     // Unmapped source fields
     $this->addUnmigratedSources(array(
@@ -209,14 +216,25 @@ class DingProfileStaffMigration extends Migration {
     // Unmapped destination fields    
     $this->addUnmigratedDestinations(array(
       'path',
+      'field_ding_staff_image',
+      'field_ding_staff_image:file_class',
+      'field_ding_staff_image:language',
+      'field_ding_staff_image:preserve_files',
+      'field_ding_staff_image:destination_dir',
+      'field_ding_staff_image:destination_file',
+      'field_ding_staff_image:file_replace',
+      'field_ding_staff_image:source_dir',
+      'field_ding_staff_image:urlencode',
+      'field_ding_staff_image:alt',
+      'field_ding_staff_image:title',
+      'field_ding_staff_department',
+      'field_ding_staff_department:source_type',
+      'field_ding_staff_department:create_term',
+      'field_ding_staff_department:ignore_case',
+      'field_ding_staff_library',
+      'field_ding_staff_library:state',
+      'field_ding_staff_library:created',
     ));
-  }
-
-  public function prepareRow($row) {
-    // Always include this snippet, in case our parent class decides to ignore the row
-    if (parent::prepareRow($row) === FALSE) {
-       return FALSE;
-    }
   }
 
   // Modify the query to include content profile data
@@ -230,6 +248,7 @@ class DingProfileStaffMigration extends Migration {
     $query->addField('nr', 'teaser'); 
     $query->addField('nr', 'title'); 
     $query->join('users', 'u', 'n.uid = u.uid'); 
+    $query->addField('u', 'uid');
     $query->addField('u', 'name'); 
     $query->addField('u', 'mail'); 
     $query->leftJoin('content_type_profile', 'ctp', 'n.nid = ctp.nid AND n.vid = ctp.vid'); 

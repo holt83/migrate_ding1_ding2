@@ -4,7 +4,9 @@
  * Handling specific to a Ding1/D6 source for roles (user roles)
  */
 class DingRoleMigration extends DrupalRole6Migration {
+  
   public function __construct(array $arguments) {
+
     $role_arguments = array(
       'machine_name' => 'DingRole',
       'group_name' => 'ding1_group',
@@ -12,9 +14,10 @@ class DingRoleMigration extends DrupalRole6Migration {
       'source_connection' => 'legacy',
       'source_version' => 6,
       'role_mappings' => array(
-        'administrator' => 'administrator',
-        'author' => 'formidler',
-        'editor' => 'redaktør',
+        'author' => 'author',
+        'editor' => 'editor',
+        'Formidler' => 'formidler',
+        'Redaktør' => 'redaktør',
       ),
     );
     

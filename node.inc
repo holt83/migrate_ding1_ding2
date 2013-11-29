@@ -18,6 +18,7 @@ abstract class DingNodeMigration extends DrupalNode6Migration {
     // list in the shared class; it can be overridden for specific migrations.
     $this->team = array(
       new MigrateTeamMember('Ewan Andreasen', 'ea@vejlebib.dk', t('Webdeveloper (Ding1 -> Ding2 Migration)')),
+      new MigrateTeamMember('Simon Holt', 'sh@randersbib.dk', t('Webdeveloper (Ding1 -> Ding2 Migration)')),
     );
 
     $this->addFieldMapping('field_legacy_nid', 'nid')
@@ -79,10 +80,13 @@ class DingLibraryMigration extends DingNodeMigration {
     // Add to sourceFields before calling parent constructor. 
     // See http://www.acquia.com/blog/drupal-drupal-data-migration-part-2-architecture
     $this->sourceFields['list_image_title'] = t('Title text extracted from field_list_image_data');
+    $this->sourceFields['list_image_alt'] = t('Alt value extracted from field_list_image_data');
     $this->sourceFields['image_title'] = t('Title text extracted from field_image_data');
+    $this->sourceFields['image_alt'] = t('Alt value extracted from field_image_data');
     
     parent::__construct($arguments);
-
+    
+    $this->removeFieldMapping('body');
     $this->addFieldMapping('field_ding_library_body', 'body');
     $this->addFieldMapping('field_ding_library_body:language')
          ->defaultValue('und');
@@ -118,11 +122,12 @@ class DingLibraryMigration extends DingNodeMigration {
          ->defaultValue('und');
     $this->addFieldMapping('field_ding_library_list_image:preserve_files')
          ->defaultValue(FALSE);
-    $this->addFieldMapping('field_ding_library_list_image:alt', 'field_list_image:alt');
+    $this->addFieldMapping('field_ding_library_list_image:alt', 'list_image_alt');
     $this->addFieldMapping('field_ding_library_list_image:title', 'list_image_title');
-    $this->addFieldMapping(NULL, 'field_list_image:data')
-         ->description(t('Split this into list_image_title for D7'));
-    $this->addFieldMapping(NULL, 'field_list_image:list');
+    $this->addFieldMapping(NULL, 'field_list_image:list')
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_list_image:alt')
+         ->issueGroup(t('DNM'));         
     
     // Map the image field to the new title image field, base this on the DingFile migration
     // to map the files to the imported files table.
@@ -134,11 +139,12 @@ class DingLibraryMigration extends DingNodeMigration {
          ->defaultValue('und');
     $this->addFieldMapping('field_ding_library_title_image:preserve_files')
          ->defaultValue(FALSE);
-    $this->addFieldMapping('field_ding_library_title_image:alt', 'field_image:alt');
+    $this->addFieldMapping('field_ding_library_title_image:alt', 'image_alt');
     $this->addFieldMapping('field_ding_library_title_image:title', 'image_title');
-    $this->addFieldMapping(NULL, 'field_image:data')
-         ->description(t('Split this into image_title for D7'));
-    $this->addFieldMapping(NULL, 'field_image:list');
+    $this->addFieldMapping(NULL, 'field_image:list')
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_image:alt')
+         ->issueGroup(t('DNM'));         
     
     // Map to addressfield. See https://drupal.org/node/1996546.
     $this->addFieldMapping('field_ding_library_addresse', 'country');
@@ -160,8 +166,6 @@ class DingLibraryMigration extends DingNodeMigration {
     $this->addFieldMapping('field_ding_library_geocode:lon', 'longitude');
     $this->addFieldMapping('field_ding_library_geocode:left', 'longitude');
     $this->addFieldMapping('field_ding_library_geocode:right', 'longitude');
-    $this->addFieldMapping(NULL, 'lid')
-         ->issueGroup(t('DNM'));
 
     // The opening_hours field in Ding2/D7 will be handled by migrating the opening_hours table of the module opening_hours
     $this->addFieldMapping('field_ding_library_opening_hours')
@@ -186,11 +190,7 @@ class DingLibraryMigration extends DingNodeMigration {
          ->issueGroup(t('DNM'));
     $this->addFieldMapping(NULL, 'field_content_images:alt')
          ->description(t('content images are not mapped to Ding2/D7'))
-         ->issueGroup(t('DNM'));
-    
-    $this->addFieldMapping(NULL, '2')
-         ->description(t('Ding2 does not employ the Tags taxonomy (taxonomy "2") for library nodes'))
-         ->issueGroup(t('DNM'));
+         ->issueGroup(t('DNM'));         
     $this->addFieldMapping(NULL, 'field_pc_booking_method')
          ->description(t('Ding2/D7 does not employ pc booking'))
          ->issueGroup(t('DNM'));
@@ -281,15 +281,32 @@ class DingLibraryMigration extends DingNodeMigration {
     if (parent::prepareRow($row) === FALSE) {
        return FALSE;
     }
-
-    // Get values from serialized data and populate the source fields defined in our constructor
-    $list_image_data = unserialize($row->field_list_image_data);
-    $row->list_image_alt = $list_image_data['alt'];
-    $row->list_image_title = $list_image_data['title'];
     
-    $image_data = unserialize($row->field_image_data);
-    $row->image_alt = $image_data['alt'];
-    $row->image_title = $image_data['title'];
+    // Manually fetch the data subfield from the image fields and populate the
+    // the image alt and title fields defined in our constructor.
+    $query = Database::getConnection('default', $this->sourceConnection)
+             ->select('content_field_list_image', 'cfli')
+             ->fields('cfli', array('field_list_image_data'))
+             ->condition('cfli.nid', $row->nid)
+             ->condition('cfli.vid', $row->vid);
+    $list_image_data = unserialize($query->execute()->fetchField());
+    $query = Database::getConnection('default', $this->sourceConnection)
+             ->select('content_field_image', 'cfi')
+             ->fields('cfi', array('field_image_data'))
+             ->condition('cfi.nid', $row->nid)
+             ->condition('cfi.vid', $row->vid);
+    $image_data = unserialize($query->execute()->fetchField());
+    
+    // Populate our fields defined in the constructor from the data in the 
+    // fetched subfields.
+    if ($list_image_data) {
+      $row->list_image_alt = $list_image_data['alt'];
+      $row->list_image_title = $list_image_data['title'];      
+    }
+    if ($image_data) {
+      $row->image_alt = $image_data['alt'];
+      $row->image_title = $image_data['title'];
+    }
 
     // Make country code uppercase
     $row->country = strtoupper($row->country);
@@ -302,7 +319,6 @@ class DingLibraryMigration extends DingNodeMigration {
   protected function query() {
     $query = parent::query();
     $query->leftJoin('location_instance', 'li', 'n.nid=li.nid AND n.vid = li.vid');
-    $query->addField('li', 'lid');
     $query->leftJoin('location', 'l', 'li.lid=l.lid');
     $query->addField('l', 'name');
     $query->addField('l', 'street');
@@ -345,34 +361,33 @@ class DingCampaignMigration extends DingNodeMigration {
 
     $this->addFieldMapping('field_camp_text_full', 'body')
          ->description(t('body is mapped to both field_camp_text_full and field_camp_text_plain'));
-    $this->addFieldMapping('field_camp_text_plain', 'body')
-         ->description(t('body is mapped to both field_camp_text_full and field_camp_text_plain'));
-    $this->addFieldMapping('field_camp_link', 'field_campaign_link');
-    $this->addFieldMapping('field_camp_image:alt', 'campaign_image_alt');
-    $this->addFieldMapping('field_camp_image:title', 'campaign_image_title');
-    $this->addFieldMapping(NULL, 'field_campaign_image:data')
-         ->description(t('Split this into campaign_image_alt and campaign_image_title for D7'));
-    $this->addFieldMapping(NULL, '2')
-         ->description(t('Ding2 does not employ the Tags taxonomy (taxonomy "2") for campaigns'));
-    $this->addFieldMapping(NULL, 'field_campaign_link:title')
-         ->description(t('Ding2 does not have title data on the campaign links'));
-    $this->addFieldMapping(NULL, 'field_campaign_link:attributes')
-         ->description(t('Ding2 does not have attribute data on the campaign links'));
-    $this->addFieldMapping('field_camp_weight', 'campaign_weight');
-    $this->addFieldMapping('field_camp_settings', 'campaign_type')
-         ->description(t('Handled in prepareRow of DingCampaignMigration'));
-    $this->addFieldMapping('field_camp_link:language')
-         ->defaultValue('und');
     $this->addFieldMapping('field_camp_text_full:language')
-         ->defaultValue('und');
-    $this->addFieldMapping('field_camp_text_plain:language')
          ->defaultValue('und');
     $this->addFieldMapping('field_camp_text_full:format')
          ->defaultValue('ding_wysiwyg');
-    $this->addFieldMapping(NULL, 'field_campaign_image:list');
+
+    $this->addFieldMapping('field_camp_text_plain', 'body')
+         ->description(t('body is mapped to both field_camp_text_full and field_camp_text_plain'));
+    $this->addFieldMapping('field_camp_text_plain:language')
+         ->defaultValue('und');         
+
+    $this->addFieldMapping('field_camp_link', 'field_campaign_link');
+    $this->addFieldMapping('field_camp_link:language')
+         ->defaultValue('und');    
+    $this->addFieldMapping(NULL, 'field_campaign_link:title')
+         ->description(t('Ding2 does not have title data on the campaign links'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, 'field_campaign_link:attributes')
+         ->description(t('Ding2 does not have attribute data on the campaign links'))
+         ->issueGroup(t('DNM'));
+    $this->addFieldMapping('field_camp_weight', 'campaign_weight');
+    $this->addFieldMapping('field_camp_settings', 'campaign_type')
+         ->description(t('Handled in prepareRow of DingCampaignMigration'));
+    $this->addFieldMapping(NULL, 'field_campaign_image:list')
+         ->issueGroup(t('DNM'));
          
-    // Map the image field to the new image field, base this on the Files migration
-    // to map the files to the imported files table.
+    $this->addFieldMapping('field_camp_image:alt', 'campaign_image_alt');
+    $this->addFieldMapping('field_camp_image:title', 'campaign_image_title');           
     $this->addFieldMapping('field_camp_image', 'field_campaign_image')
          ->sourceMigration('DingFile');
     $this->addFieldMapping('field_camp_image:file_class')
@@ -400,10 +415,21 @@ class DingCampaignMigration extends DingNodeMigration {
        return FALSE;
     }
     
-    // Get values from serialized data and populate the source fields defined in our constructor
-    $campaign_image_data = unserialize($row->field_campaign_image_data);
-    $row->campaign_image_alt = $campaign_image_data['alt'];
-    $row->campaign_image_title = $campaign_image_data['title'];
+    // Manually fetch the data subfield from the image fields and populate the
+    // the image alt and title fields defined in our constructor.
+    $query = Database::getConnection('default', $this->sourceConnection)
+             ->select('content_type_campaign', 'ctc')
+             ->fields('ctc', array('field_campaign_image_data'))
+             ->condition('ctc.nid', $row->nid)
+             ->condition('ctc.vid', $row->vid);
+    $campaign_image_data = unserialize($query->execute()->fetchField());    
+    
+    // Populate our fields defined in the constructor from the data in the 
+    // fetched subfields.
+    if ($campaign_image_data) {
+      $row->campaign_image_alt = $campaign_image_data['alt'];
+      $row->campaign_image_title = $campaign_image_data['title'];      
+    }
     
     // Modify text in campaign_type
     $row->campaign_type = str_replace('-only', '', $row->campaign_type);
@@ -435,6 +461,7 @@ class DingPageMigration extends DingNodeMigration {
     // Add to sourceFields before calling parent constructor. 
     // See http://www.acquia.com/blog/drupal-drupal-data-migration-part-2-architecture
     $this->sourceFields['list_image_title'] = t('Title text extracted from field_list_image_data');
+    $this->sourceFields['list_image_alt'] = t('Alt value extracted from field_list_image_data');
     
     parent::__construct($arguments);
 
@@ -472,10 +499,8 @@ class DingPageMigration extends DingNodeMigration {
     $this->addFieldMapping('field_ding_page_list_image:preserve_files')
          ->defaultValue(FALSE);
     // Mapping remaining list image fields
-    $this->addFieldMapping('field_ding_page_list_image:alt', 'field_list_image:alt');
+    $this->addFieldMapping('field_ding_page_list_image:alt', 'list_image_alt');
     $this->addFieldMapping('field_ding_page_list_image:title', 'list_image_title');
-    $this->addFieldMapping(NULL, 'field_list_image:data')
-         ->description(t('Split this into list_image_title for D7'));
     $this->addFieldMapping(NULL, 'field_list_image:list');
 
     // ting references
@@ -487,14 +512,18 @@ class DingPageMigration extends DingNodeMigration {
          ->description(t('Not mapped - Ding2 does not employ descriptions on ting refs.'));
 
     // Tags term mapping
-    $this->addFieldMapping('field_ding_page_tags', '2')
-         ->sourceMigration('DingTagsTerm');
+    $this->addFieldMapping('field_ding_page_tags')
+         ->issueGroup(t('DNM'))
+         ->description(t('Not mapped - Tags term does not apply to the page type in Ding1'));
     $this->addFieldMapping('field_ding_page_tags:source_type')
-         ->defaultValue('tid');
+         ->issueGroup(t('DNM'))
+         ->description(t('Not mapped - Tags term does not apply to the page type in Ding1'));
     $this->addFieldMapping('field_ding_page_tags:create_term')
-         ->defaultValue(TRUE);
+         ->issueGroup(t('DNM'))
+         ->description(t('Not mapped - Tags term does not apply to the page type in Ding1'));
     $this->addFieldMapping('field_ding_page_tags:ignore_case')
-         ->defaultValue(TRUE);
+         ->issueGroup(t('DNM'))
+         ->description(t('Not mapped - Tags term does not apply to the page type in Ding1'));
 
     // Unmapped source fields
     $this->addFieldMapping(NULL, 'revision')
@@ -509,8 +538,6 @@ class DingPageMigration extends DingNodeMigration {
     $this->addFieldMapping(NULL, 'field_content_images')
          ->issueGroup(t('DNM'));
     $this->addFieldMapping(NULL, 'field_content_images:list')
-         ->issueGroup(t('DNM'));
-    $this->addFieldMapping(NULL, 'field_content_images:alt')
          ->issueGroup(t('DNM'));
     $this->addFieldMapping(NULL, 'field_file_attachments:list')
          ->issueGroup(t('DNM'));
@@ -541,16 +568,22 @@ class DingPageMigration extends DingNodeMigration {
     if (parent::prepareRow($row) === FALSE) {
        return FALSE;
     }
+    // Manually fetch the data subfield from the image fields and populate the
+    // the image alt and title fields defined in our constructor.
+    $query = Database::getConnection('default', $this->sourceConnection)
+             ->select('content_field_list_image', 'cfli')
+             ->fields('cfli', array('field_list_image_data'))
+             ->condition('cfli.nid', $row->nid)
+             ->condition('cfli.vid', $row->vid);
+    $list_image_data = unserialize($query->execute()->fetchField());
     
-    // Get values from serialized data and populate the source fields defined in our constructor
-    // file attachments
-    $file_attachments_data = unserialize($row->field_file_attachments_data);
-    $row->file_attachments_description = $file_attachments_data['description'];
-
-    // list images
-    $list_image_data = unserialize($row->field_list_image_data);
-    $row->list_image_alt = $list_image_data['alt'];
-    $row->list_image_title = $list_image_data['title'];
+    // Populate our fields defined in the constructor from the data in the 
+    // fetched subfields. Since we dont have a delta in the table, we know 
+    // there is only one row and we just use an if-statement.
+    if ($list_image_data) {
+      $row->list_image_alt = $list_image_data['alt'];
+      $row->list_image_title = $list_image_data['title'];      
+    }
   }
 
   public function complete($node, stdClass $row) {
@@ -577,6 +610,7 @@ class DingNewsMigration extends DingNodeMigration {
     // Add to sourceFields before calling parent constructor. 
     // See http://www.acquia.com/blog/drupal-drupal-data-migration-part-2-architecture
     $this->sourceFields['list_image_title'] = t('Title text extracted from field_list_image_data');
+    $this->sourceFields['list_image_alt'] = t('Alt value extracted from field_list_image_data');
 
     parent::__construct($arguments);
 
@@ -602,7 +636,7 @@ class DingNewsMigration extends DingNodeMigration {
          ->defaultValue(FALSE);
     // Mapping remaining news file fields
     $this->addFieldMapping('field_ding_news_files:description', 'field_file_attachments:description');
-    $this->addFieldMapping('field_ding_news_files:display', 'file_attachments_description')
+    $this->addFieldMapping('field_ding_news_files:display', 'field_file_attachments:description')
          ->description(t('Use file_attachments_description again for this value'));
 
     // Map the list image field to the new list image field, base this on the DingFile migration
@@ -616,17 +650,20 @@ class DingNewsMigration extends DingNodeMigration {
     $this->addFieldMapping('field_ding_news_list_image:preserve_files')
          ->defaultValue(FALSE);
     // Mapping remaining list image fields
-    $this->addFieldMapping('field_ding_news_list_image:alt', 'field_list_image:alt');
+    $this->addFieldMapping('field_ding_news_list_image:alt', 'list_image_alt');
     $this->addFieldMapping('field_ding_news_list_image:title', 'list_image_title');
-    $this->addFieldMapping(NULL, 'field_list_image:list');
+    $this->addFieldMapping(NULL, 'field_list_image:list')
+         ->issueGroup(t('DNM'));
 
     // ting references
     $this->addFieldMapping(NULL, 'field_ting_refs')
          ->description(t('Handled in complete function'));
     $this->addFieldMapping(NULL, 'field_ting_refs:ting_ref_type')
-         ->description(t('Not mapped - Ding2 does not employ ref types'));
+         ->description(t('Not mapped - Ding2 does not employ ref types'))
+         ->issueGroup(t('DNM'));
     $this->addFieldMapping(NULL, 'field_ting_refs:description')
-         ->description(t('Not mapped - Ding2 does not employ descriptions on ting refs.'));
+         ->description(t('Not mapped - Ding2 does not employ descriptions on ting refs.'))
+         ->issueGroup(t('DNM'));
 
     // News Category term mapping
     $this->addFieldMapping('field_ding_news_category', '1')
@@ -662,8 +699,6 @@ class DingNewsMigration extends DingNodeMigration {
          ->issueGroup(t('DNM'));
     $this->addFieldMapping(NULL, 'field_content_images:list')
          ->issueGroup(t('DNM'));
-    $this->addFieldMapping(NULL, 'field_content_images:alt')
-         ->issueGroup(t('DNM'));
     $this->addFieldMapping(NULL, 'field_file_attachments:list')
          ->issueGroup(t('DNM'));
 
@@ -694,10 +729,22 @@ class DingNewsMigration extends DingNodeMigration {
        return FALSE;
     }
     
-    // Get values from serialized data and populate the source fields defined in our constructor
-    // list images
-    $list_image_data = unserialize($row->field_list_image_data);
-    $row->list_image_title = $list_image_data['title'];
+    // Manually fetch the data subfield from the image fields and populate the
+    // the image alt and title fields defined in our constructor.
+    $query = Database::getConnection('default', $this->sourceConnection)
+             ->select('content_field_list_image', 'cfli')
+             ->fields('cfli', array('field_list_image_data'))
+             ->condition('cfli.nid', $row->nid)
+             ->condition('cfli.vid', $row->vid);
+    $list_image_data = unserialize($query->execute()->fetchField());
+    
+    // Populate our fields defined in the constructor from the data in the 
+    // fetched subfields. Since we dont have a delta in the table, we can treat
+    // it as one row.
+    if ($list_image_data) {
+      $row->list_image_alt = $list_image_data['alt'];
+      $row->list_image_title = $list_image_data['title'];      
+    }
   }
 
   public function prepare($node, stdClass $row) {
@@ -748,7 +795,7 @@ class DingEventMigration extends DingNodeMigration {
 
     // Add to sourceFields before calling parent constructor. 
     // See http://www.acquia.com/blog/drupal-drupal-data-migration-part-2-architecture
-    $this->sourceFields['list_image_alt'] = t('Alt text extracted from field_list_image_data');
+    $this->sourceFields['list_image_alt'] = t('Alt value extracted from field_list_image_data');
     $this->sourceFields['list_image_title'] = t('Title text extracted from field_list_image_data');
     
     parent::__construct($arguments);

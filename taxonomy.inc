@@ -3,7 +3,7 @@
 /**
  * Common mappings for the Drupal 6 node migrations.
  */
-abstract class DingTermMigration extends DrupalTerm6Migration {
+abstract class DingTermMigration extends DrupalTerm6Migration {  
   public function __construct(array $arguments) {
     $common_arguments = array(
       'source_connection' => 'legacy',

@@ -1,0 +1,29 @@
+<?php
+
+/**
+ * @file 
+ * Install file for the Migrate ding1 ding2 module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function migrate_ding1_ding2_install() {
+	if (!field_info_field('field_legacy_nid')) {
+		$field = array(
+			'name' => 'field_legacy_nid',
+			'label' => 'Field for legacy D6 nid'
+			'type' => 'integer',
+			'cardinality' => 1,
+			'translatable' => FALSE,
+		);
+		$field_create_field($field);
+	}
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function migrate_ding1_ding2_uninstall() {
+	
+}

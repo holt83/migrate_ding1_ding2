@@ -7,6 +7,9 @@
 
 /**
  * Implements hook_install().
+ *
+ * Create the field_legacy_nid on all the ding bundles to hold the legacy nid
+ * from Drupal 6.
  */
 function migrate_ding1_ding2_install() {
 	if (!field_info_field('field_legacy_nid')) {

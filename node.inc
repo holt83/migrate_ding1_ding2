@@ -841,10 +841,7 @@ class DingEventMigration extends DingNodeMigration {
     // Mapping remaining list image fields
     $this->addFieldMapping('field_ding_event_list_image:alt', 'list_image_alt');
     $this->addFieldMapping('field_ding_event_list_image:title', 'list_image_title');
-    $this->addFieldMapping(NULL, 'field_list_image:data')
-         ->description(t('Split this into list_image_alt and list_image_title for D7'));
     $this->addFieldMapping(NULL, 'field_list_image:list');
-    $this->addFieldMapping(NULL, 'field_list_image:alt');
 
     // Map to addressfield. See https://drupal.org/node/1996546.
     $this->addFieldMapping('field_ding_event_location', 'country');
@@ -903,8 +900,6 @@ class DingEventMigration extends DingNodeMigration {
          ->issueGroup(t('DNM'));
     $this->addFieldMapping(NULL, 'field_content_images:list')
          ->issueGroup(t('DNM'));
-    $this->addFieldMapping(NULL, 'field_content_images:alt')
-         ->issueGroup(t('DNM'));
     $this->addFieldMapping(NULL, 'field_file_attachments:list')
          ->issueGroup(t('DNM'));
     $this->addFieldMapping(NULL, 'revision')
@@ -916,9 +911,16 @@ class DingEventMigration extends DingNodeMigration {
     $this->addFieldMapping(NULL, 'revision_uid')
          ->description(t('Migration of revisions is possible, but not implemented in this migration'))
          ->issueGroup(t('DNM'));
+    $this->addFieldMapping(NULL, '1')
+         ->description(t('Ding event post category. Not implemented in ding2'))
+         ->issueGroup('DNM');
+    $this->addFieldMapping(NULL, 'field_kultunaut_agegroup')
+         ->issueGroup('DNM');
+    $this->addFieldMapping(NULL, 'field_kultunaut_category')
+         ->issueGroup('DNM');
 
     // Unmapped destination fields
-    $this->addUnmigratedDestinations(array(
+    $this->addUnmigratedDestinations(array(  
       'field_ding_event_title_image', 
       'field_ding_event_title_image:file_class', 
       'field_ding_event_title_image:language', 
@@ -958,11 +960,22 @@ class DingEventMigration extends DingNodeMigration {
        return FALSE;
     }
     
-    // Get values from serialized data and populate the source fields defined in our constructor
-    // list images
-    $list_image_data = unserialize($row->field_list_image_data);
-    $row->list_image_alt = $list_image_data['alt'];
-    $row->list_image_title = $list_image_data['title'];
+    // Manually fetch the data subfield from the image fields and populate the
+    // the image alt and title fields defined in our constructor.
+    $query = Database::getConnection('default', $this->sourceConnection)
+             ->select('content_field_list_image', 'cfli')
+             ->fields('cfli', array('field_list_image_data'))
+             ->condition('cfli.nid', $row->nid)
+             ->condition('cfli.vid', $row->vid);
+    $list_image_data = unserialize($query->execute()->fetchField());
+    
+    // Populate our fields defined in the constructor from the data in the 
+    // fetched subfields. Since we dont have a delta in the table, we can treat
+    // it as one row.
+    if ($list_image_data) {
+      $row->list_image_alt = $list_image_data['alt'];
+      $row->list_image_title = $list_image_data['title'];      
+    }
     
     // Handle date field
     $date_data = array(

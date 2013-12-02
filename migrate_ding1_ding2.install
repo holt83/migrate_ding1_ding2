@@ -11,13 +11,36 @@
 function migrate_ding1_ding2_install() {
 	if (!field_info_field('field_legacy_nid')) {
 		$field = array(
-			'name' => 'field_legacy_nid',
-			'label' => 'Field for legacy D6 nid'
-			'type' => 'integer',
-			'cardinality' => 1,
-			'translatable' => FALSE,
+			'field_name' => 'field_legacy_nid',
+			'label' => 'Legacy D6 nid',
+			'type' => 'number_integer',
 		);
-		$field_create_field($field);
+		$field = field_create_field($field);
+	}
+	$instance_common = array(
+		'field_name' => 'field_legacy_nid',
+		'entity_type' => 'node',
+		'label' => 'Legacy D6 nid',
+		'description' => 'The node legacy nid from Drupal 6.',
+		'widget' => array(
+			'type' => 'text_textfield',
+		),
+		'display' => array(
+			'default' => array(
+				'label' => 'hidden',
+				'type' => 'hidden',
+				'settings' => array(),
+			), 
+		), 
+	);
+	$bundles = array('ding_library', 'ding_campaign', 'ding_page', 'ding_news', 'ding_event');
+	foreach ($bundles as $bundle) {
+		if (!field_info_instance('node', 'field_legacy_nid', $bundle)) {
+			$instance = array(
+				'bundle' => $bundle,
+			);
+			field_create_instance($instance + $instance_common);
+		}
 	}
 }
 
@@ -25,5 +48,11 @@ function migrate_ding1_ding2_install() {
  * Implements hook_uninstall().
  */
 function migrate_ding1_ding2_uninstall() {
-	
+	$bundles = array('ding_library', 'ding_campaign', 'ding_page', 'ding_news', 'ding_event');
+	foreach ($bundles as $bundle) {
+		$instance = field_info_instance('node', 'field_legacy_nid', $bundle);
+		field_delete_instance($instance);
+	}
+	field_delete_field('field_legacy_nid');
+	field_purge_batch(10);
 }

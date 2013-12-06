@@ -943,8 +943,6 @@ class DingEventMigration extends DingNodeMigration {
       'field_ding_event_location:first_name',
       'field_ding_event_location:last_name',
       'field_ding_event_location:data',
-      'field_place2book_tickets', // If this field shows up in the list of destination fields, it should be ignored
-      'field_place2book_tickets:language', // If this field shows up in the list of destination fields, it should be ignored
     ));
 
   }

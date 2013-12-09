@@ -5,11 +5,10 @@
  */
 class DingRoleMigration extends DrupalRole6Migration {
   
-  public function __construct(array $arguments) {
+  public function __construct(array $input_arguments) {
 
     $role_arguments = array(
       'machine_name' => 'DingRole',
-      'group_name' => 'ding1_group',
       'description' => t('Migration of Roles from Ding1/D6'),
       'source_connection' => 'legacy',
       'source_version' => 6,
@@ -21,7 +20,7 @@ class DingRoleMigration extends DrupalRole6Migration {
       ),
     );
     
-    parent::__construct($role_arguments);
+    parent::__construct($input_arguments + $role_arguments);
 
   }
 }

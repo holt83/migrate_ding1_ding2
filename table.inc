@@ -41,12 +41,11 @@ abstract class DingTableMigration extends Migration {
 
 
 class DingPlace2bookMigration extends DingTableMigration {
-  public function __construct($arguments) {
+  public function __construct($input_arguments) {
     
     $arguments = array(
       'description' => t('Migration of ding_place2book table from Ding1/D6'),
       'machine_name' => 'DingPlace2book',
-      'group_name' => 'ding1_group',
       'source_table' => 'ding_place2book',
       'destination_table' => 'ding_place2book',
       'dependencies' => array('DingEvent'),
@@ -61,7 +60,7 @@ class DingPlace2bookMigration extends DingTableMigration {
       ),
     );
 
-    parent::__construct($arguments);
+    parent::__construct($input_arguments + $arguments);
 
     $this->addSimpleMappings(array('place2book_id', 'capacity', 'maintain_copy', 'kultunaut_export', 'passive'));
     
@@ -84,12 +83,11 @@ class DingPlace2bookMigration extends DingTableMigration {
 
 
 class DingAuthmapMigration extends DingTableMigration {
-  public function __construct($arguments) {
+  public function __construct($input_arguments) {
     
     $arguments = array(
       'description' => t('Migration of authmap table from Ding1/D6'),
       'machine_name' => 'DingAuthmap',
-      'group_name' => 'ding1_group',
       'source_table' => 'authmap',
       'destination_table' => 'authmap',
       'dependencies' => array('DingUser'),
@@ -104,7 +102,7 @@ class DingAuthmapMigration extends DingTableMigration {
       ),
     );
 
-    parent::__construct($arguments);
+    parent::__construct($input_arguments + $arguments);
 
     $this->addSimpleMappings(array('authname'));
     

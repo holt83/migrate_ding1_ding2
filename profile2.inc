@@ -6,7 +6,7 @@
 
 class DingProfileProviderAlmaMigration extends Migration {
   
-  public function __construct($arguments) {
+  public function __construct($input_arguments) {
     
     global $user;
     
@@ -16,12 +16,11 @@ class DingProfileProviderAlmaMigration extends Migration {
     $this->description = t('Migration of user provider data from Ding1/D6');
     $this->dependencies = array('DingUser', 'DingFile');
 
-    $arguments = array(
+    $common_arguments = array(
       'machine_name' => 'DingProfileProviderAlma',
-      'group_name' => 'ding1_group',
     );
 
-    parent::__construct($arguments);
+    parent::__construct($input_arguments + $common_arguments);
 
     $this->map = new MigrateSQLMap($this->machineName,
       array(
@@ -140,7 +139,7 @@ class DingProfileProviderAlmaMigration extends Migration {
 
 
 class DingProfileStaffMigration extends Migration {
-  public function __construct($arguments) {
+  public function __construct($input_arguments) {
     global $user;
     
     $this->team = array(
@@ -150,12 +149,11 @@ class DingProfileStaffMigration extends Migration {
     $this->description = t('Migration of user content profile data from Ding1/D6');
     $this->dependencies = array('DingUser', 'DingFile', 'DingLibrary');
 
-    $arguments = array(
+    $common_arguments = array(
       'machine_name' => 'DingProfileStaff',
-      'group_name' => 'ding1_group',
     );
     
-    parent::__construct($arguments);
+    parent::__construct($input_arguments + $common_arguments);
 
     $this->map = new MigrateSQLMap($this->machineName,
       array(

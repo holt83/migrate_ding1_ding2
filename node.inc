@@ -4,14 +4,14 @@
  * Common mappings for the Drupal 6 node migrations.
  */
 abstract class DingNodeMigration extends DrupalNode6Migration {
-  public function __construct(array $arguments) {
-    $common_arguments = array(
+  public function __construct(array $input_arguments) {
+    $arguments = array(
       'source_connection' => 'legacy',
       'source_version' => 6,
       'user_migration' => 'DingUser',
     );
     
-    parent::__construct($arguments + $common_arguments);
+    parent::__construct($input_arguments + $arguments);
 
     // With migrate_ui enabled, migration pages will indicate people involved in
     // the particular migration, with their role and contact info. We default the
@@ -66,12 +66,11 @@ abstract class DingNodeMigration extends DrupalNode6Migration {
 
 
 class DingLibraryMigration extends DingNodeMigration {
-  public function __construct($arguments) {
+  public function __construct($input_arguments) {
     
     $arguments = array(
       'description' => t('Migration of Libraries from Ding1/D6'),
       'machine_name' => 'DingLibrary',
-      'group_name' => 'ding1_group',
       'source_type' => 'library',
       'destination_type' => 'ding_library',
       'dependencies' => array('DingUser','DingFile'),
@@ -84,7 +83,7 @@ class DingLibraryMigration extends DingNodeMigration {
     $this->sourceFields['image_title'] = t('Title text extracted from field_image_data');
     $this->sourceFields['image_alt'] = t('Alt value extracted from field_image_data');
     
-    parent::__construct($arguments);
+    parent::__construct($input_arguments + $arguments);
     
     $this->removeFieldMapping('body');
     $this->addFieldMapping('field_ding_library_body', 'body');
@@ -341,12 +340,11 @@ class DingLibraryMigration extends DingNodeMigration {
 
 
 class DingCampaignMigration extends DingNodeMigration {
-  public function __construct($arguments) {
+  public function __construct($input_arguments) {
     
     $arguments = array(
       'description' => t('Migration of Campaigns from Ding1/D6'),
       'machine_name' => 'DingCampaign',
-      'group_name' => 'ding1_group',
       'source_type' => 'campaign',
       'destination_type' => 'ding_campaign',
       'dependencies' => array('DingUser', 'DingFile'),
@@ -357,7 +355,7 @@ class DingCampaignMigration extends DingNodeMigration {
     $this->sourceFields['campaign_image_alt'] = t('Alt text extracted from field_campaign_image_data');
     $this->sourceFields['campaign_image_title'] = t('Title text extracted from field_campaign_image_data');
     
-    parent::__construct($arguments);
+    parent::__construct($input_arguments + $arguments);
 
     $this->addFieldMapping('field_camp_text_full', 'body')
          ->description(t('body is mapped to both field_camp_text_full and field_camp_text_plain'));
@@ -447,12 +445,11 @@ class DingCampaignMigration extends DingNodeMigration {
 
 
 class DingPageMigration extends DingNodeMigration {
-  public function __construct($arguments) {
+  public function __construct($input_arguments) {
     
     $arguments = array(
       'description' => t('Migration of Pages from Ding1/D6'),
       'machine_name' => 'DingPage',
-      'group_name' => 'ding1_group',
       'source_type' => 'page',
       'destination_type' => 'ding_page',
       'dependencies' => array('DingUser','DingTagsTerm', 'DingLibrary', 'DingFile'),
@@ -463,7 +460,7 @@ class DingPageMigration extends DingNodeMigration {
     $this->sourceFields['list_image_title'] = t('Title text extracted from field_list_image_data');
     $this->sourceFields['list_image_alt'] = t('Alt value extracted from field_list_image_data');
     
-    parent::__construct($arguments);
+    parent::__construct($input_arguments + $arguments);
 
     $this->addFieldMapping('field_ding_page_body', 'body');
     $this->addFieldMapping('field_ding_page_body:language')
@@ -596,12 +593,11 @@ class DingPageMigration extends DingNodeMigration {
 
 
 class DingNewsMigration extends DingNodeMigration {
-  public function __construct($arguments) {
+  public function __construct($input_arguments) {
     
     $arguments = array(
       'description' => t('Migration of Blogposts/News from Ding1/D6'),
       'machine_name' => 'DingNews',
-      'group_name' => 'ding1_group',
       'source_type' => 'article',
       'destination_type' => 'ding_news',
       'dependencies' => array('DingUser','DingNewsCategoryTerm','DingTagsTerm','DingFile','DingLibrary'),
@@ -612,7 +608,7 @@ class DingNewsMigration extends DingNodeMigration {
     $this->sourceFields['list_image_title'] = t('Title text extracted from field_list_image_data');
     $this->sourceFields['list_image_alt'] = t('Alt value extracted from field_list_image_data');
 
-    parent::__construct($arguments);
+    parent::__construct($input_arguments + $arguments);
 
     $this->addFieldMapping('field_ding_news_body', 'body');
     $this->addFieldMapping('field_ding_news_body:language')
@@ -782,12 +778,11 @@ class DingNewsMigration extends DingNodeMigration {
 
 
 class DingEventMigration extends DingNodeMigration {
-  public function __construct($arguments) {
+  public function __construct($input_arguments) {
     
     $arguments = array(
       'description' => t('Migration of Events from Ding1/D6'),
       'machine_name' => 'DingEvent',
-      'group_name' => 'ding1_group',
       'source_type' => 'event',
       'destination_type' => 'ding_event',
       'dependencies' => array('DingUser','DingEventCategoryTerm','DingEventTargetTerm', 'DingTagsTerm', 'DingFile', 'DingLibrary'),
@@ -798,7 +793,7 @@ class DingEventMigration extends DingNodeMigration {
     $this->sourceFields['list_image_alt'] = t('Alt value extracted from field_list_image_data');
     $this->sourceFields['list_image_title'] = t('Title text extracted from field_list_image_data');
     
-    parent::__construct($arguments);
+    parent::__construct($input_arguments + $arguments);
 
     $this->addFieldMapping('field_ding_event_body', 'body');
     $this->addFieldMapping('field_ding_event_body:language')

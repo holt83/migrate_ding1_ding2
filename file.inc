@@ -6,7 +6,7 @@
 
 class DingFileMigration extends DrupalFile6Migration {
   
-  public function __construct($arguments) {
+  public function __construct($input_arguments) {
     // in settings.php file, add the absolute path your ding1 sites files reside in by including the line:
     // $conf['migrate_ding1_ding2_source_dir'] = '/home/YOUR-DING1-SITE/sites/default/files';
     $source_dir = variable_get('migrate_ding1_ding2_source_dir', '/home/drupalpro/websites/libsite-dumps/randersbibdk-files');
@@ -18,12 +18,11 @@ class DingFileMigration extends DrupalFile6Migration {
       'source_version' => 6,
       'description' => t('Migration of files from Ding1/D6'),
       'machine_name' => 'DingFile',
-      'group_name' => 'ding1_group',
       'source_dir' => $source_dir,
       'user_migration' => 'DingUser',
     );
     
-    parent::__construct($file_arguments);
+    parent::__construct($input_arguments + $file_arguments);
   
     // Removing and redefining existing field mapping
     $this->removeFieldMapping('destination_file');

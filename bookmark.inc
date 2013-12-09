@@ -41,14 +41,13 @@ abstract class DingFlagMigration extends Migration {
 
 
 class DingBookmarkMigration extends DingFlagMigration {
-  public function __construct($arguments) {
+  public function __construct($input_arguments) {
     // "bookmark" flags in ding2 has fid = 2
     $bookmark_fid = 2;
     
     $arguments = array(
       'description' => t('Migration of ding_cart table from Ding1/D6 into D7 bookmark flags (ding_bookmark)'),
       'machine_name' => 'DingBookmark',
-      'group_name' => 'ding1_group',
       'source_table' => 'ding_cart',
       'destination_fid' => $bookmark_fid,
       'dependencies' => array('DingUser'),
@@ -68,7 +67,7 @@ class DingBookmarkMigration extends DingFlagMigration {
       ),
     );
     
-    parent::__construct($arguments);
+    parent::__construct($input_arguments + $arguments);
 
     $this->addFieldMapping('uid', 'uid')
          ->sourceMigration('DingUser');

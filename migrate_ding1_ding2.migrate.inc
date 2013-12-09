@@ -17,31 +17,82 @@ function migrate_ding1_ding2_migrate_api() {
     ), 
     'migrations' => array(
       // Node types
-      'DingCampaign' => array('class_name' => 'DingCampaignMigration'),
-      'DingEvent' => array('class_name' => 'DingEventMigration'),
-      'DingLibrary' => array('class_name' => 'DingLibraryMigration'),
-      'DingNews' => array('class_name' => 'DingNewsMigration'),
-      'DingPage' => array('class_name' => 'DingPageMigration'),
+      'DingCampaign' => array(
+        'class_name' => 'DingCampaignMigration',
+        'group_name' => 'ding1_group',
+      ),
+      'DingEvent' => array(
+        'class_name' => 'DingEventMigration',
+        'group_name' => 'ding1_group',
+      ),
+      'DingLibrary' => array(
+        'class_name' => 'DingLibraryMigration',
+        'group_name' => 'ding1_group',
+      ),
+      'DingNews' => array(
+        'class_name' => 'DingNewsMigration',
+        'group_name' => 'ding1_group',
+      ),
+      'DingPage' => array(
+        'class_name' => 'DingPageMigration',
+        'group_name' => 'ding1_group',
+      ),
 
       // User profiles
-      'DingRole' => array('class_name' => 'DingRoleMigration'),
-      'DingUser' => array('class_name' => 'DingUserMigration'),
-      'DingProfileProviderAlma' => array('class_name' => 'DingProfileProviderAlmaMigration'),
-      'DingProfileStaff' => array('class_name' => 'DingProfileStaffMigration'),
+      'DingRole' => array(
+        'class_name' => 'DingRoleMigration',
+        'group_name' => 'ding1_group',
+      ),
+      'DingUser' => array(
+        'class_name' => 'DingUserMigration',
+        'group_name' => 'ding1_group',
+      ),
+      'DingProfileProviderAlma' => array(
+        'class_name' => 'DingProfileProviderAlmaMigration',
+        'group_name' => 'ding1_group',
+      ),
+      'DingProfileStaff' => array(
+        'class_name' => 'DingProfileStaffMigration',
+        'group_name' => 'ding1_group',
+      ),
 
       // Taxonomies
-      'DingEventCategoryTerm' => array('class_name' => 'DingEventCategoryTermMigration'),
-      'DingEventTargetTerm' => array('class_name' => 'DingEventTargetTermMigration'),
-      'DingNewsCategoryTerm' => array('class_name' => 'DingNewsCategoryTermMigration'),
-      'DingTagsTerm' => array('class_name' => 'DingTagsTermMigration'),
+      'DingEventCategoryTerm' => array(
+        'class_name' => 'DingEventCategoryTermMigration',
+        'group_name' => 'ding1_group',
+      ),
+      'DingEventTargetTerm' => array(
+        'class_name' => 'DingEventTargetTermMigration',
+        'group_name' => 'ding1_group',
+      ),
+      'DingNewsCategoryTerm' => array(
+        'class_name' => 'DingNewsCategoryTermMigration',
+        'group_name' => 'ding1_group',
+      ),
+      'DingTagsTerm' => array(
+        'class_name' => 'DingTagsTermMigration',
+        'group_name' => 'ding1_group',
+      ),
 
       // Tables
-      'DingPlace2book' => array('class_name' => 'DingPlace2bookMigration'),
-      'DingAuthmap' => array('class_name' => 'DingAuthmapMigration'),
+      'DingPlace2book' => array(
+        'class_name' => 'DingPlace2bookMigration',
+        'group_name' => 'ding1_group',
+      ),
+      'DingAuthmap' => array(
+        'class_name' => 'DingAuthmapMigration',
+        'group_name' => 'ding1_group',
+      ),
 
       // Miscellaneous
-      'DingFile' => array('class_name' => 'DingFileMigration'),
-      'DingBookmark' => array('class_name' => 'DingBookmarkMigration'),
+      'DingFile' => array(
+        'class_name' => 'DingFileMigration',
+        'group_name' => 'ding1_group',
+      ),
+      'DingBookmark' => array(
+        'class_name' => 'DingBookmarkMigration',
+        'group_name' => 'ding1_group',
+      ),
       
     ),
 

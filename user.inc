@@ -8,16 +8,14 @@ class DingUserMigration extends DrupalUser6Migration {
   
   public function __construct(array $arguments) {
     
-    $arguments = array(
+    $common_arguments = array(
       'description' => t('Migration of Users from Ding1/D6'),
       'machine_name' => 'DingUser',
-      'group_name' => 'ding1_group',
       'source_connection' => 'legacy',
       'source_version' => 6,
       'role_migration' => 'DingRole',
     );
-    
-    parent::__construct($arguments);
+    parent::__construct($arguments + $common_arguments);
 
     // Unmapped source fields
     $this->addUnmigratedSources(array(

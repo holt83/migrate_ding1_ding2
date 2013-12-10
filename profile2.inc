@@ -252,9 +252,6 @@ class DingProfileStaffMigration extends Migration {
     $query->leftJoin('content_type_profile', 'ctp', 'n.nid = ctp.nid AND n.vid = ctp.vid'); 
     $query->addField('ctp','field_staff_title_value'); 
     $query->addField('ctp','field_work_area_value'); 
-    $query->addField('ctp','field_firstname_value'); 
-    $query->addField('ctp','field_phone_value'); 
-    $query->addField('ctp','field_surname_value'); 
     $query->orderBy('n.nid', 'ASC'); 
     // See more at: http://www.grasmash.com/article/migrate-classes-content-profile-profile2#sthash.5JUMSwgz.dpuf
     return $query;
